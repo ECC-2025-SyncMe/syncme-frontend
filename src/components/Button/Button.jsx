@@ -8,7 +8,7 @@ const Button = ({ label, icon, isActive, onClick }) => {
       className={`nav-button ${isActive ? 'active' : ''}`}
       onClick={onClick}
     >
-      <div className="button-icon">{icon}</div>
+      {icon && <div className="button-icon">{icon}</div>}
       <span className="button-label">{label.toUpperCase()}</span>
     </button>
   );

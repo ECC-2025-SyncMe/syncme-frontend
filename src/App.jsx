@@ -10,19 +10,19 @@ function App() {
       <nav className="nav-bar">
         <Button
           label="HOME"
-          icon="🏠"
+          icon="⌂"
           isActive={activeIndex === 'HOME'}
           onClick={() => setActiveIndex('HOME')}
         />
         <Button
           label="STATUS"
-          icon="✏️"
+          icon="✎"
           isActive={activeIndex === 'STATUS'}
           onClick={() => setActiveIndex('STATUS')}
         />
         <Button
           label="SYSTEM"
-          icon="⚙️"
+          icon="⚙"
           isActive={activeIndex === 'SYSTEM'}
           onClick={() => setActiveIndex('SYSTEM')}
         />
