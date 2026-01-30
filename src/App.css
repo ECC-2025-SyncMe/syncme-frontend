@@ -1,7 +1,7 @@
 .app-container {
   background-color: #0d0e0f;
-  height: 80vh;
-  width: 80vw;
+  height: 1024px;
+  width: 1440px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -10,10 +10,16 @@
 }
 
 .nav-bar {
-  display: flex;
-  background-color: #2b2c2e;
-  padding: 7px 16px;
-  border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  gap: 10px;
+  top: 841px;
+  left: 50%;
+  transform: translateX(-50%); /* 가로 중앙 정렬 */
+  width: 1024px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+
+  justify-content: space-around;
+  background-color: #2b2c2e;
+  border-radius: 16px;
 }
