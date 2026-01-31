@@ -1,35 +1,37 @@
-/* home, status, settings 버튼에 사용되는 공통 버튼 컴포넌트 */
-.nav-button {
-  display: flex;
-  flex-direction: column;
+.custom-button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 24px;
-  background-color: transparent; /* 기본 배경색 투명하게 */
-  border: none;
-  border-radius: 12px;
-  color: #8a94a6;
-  gap: 8px;
-  min-width: 100px;
+  width: 256px;
+  height: 68px;
+
+  margin: 5px;
+  font-size: 16px;
+  font-weight: 500;
+
+  background-color: #000000;
+  border: 1px solid #ccc;
+  color: #ffffff;
+  cursor: pointer;
 }
 
-/* 활성화(Active) 상태 스타일 */
-.nav-button.active {
-  background-color: #243b3b;
-  color: #10b981;
-  padding: 6px 8px;
+.custom-button:hover {
+  background-color: #a0cefd;
+  border-color: #1f1c1c;
 }
 
-.nav-button:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.05);
+.custom-button:active {
+  background-color: #d0d0d0;
+  transform: scale(0.98);
 }
 
 .button-icon {
-  font-size: 25px;
+  margin-right: 8px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #ffffff;
 }
 
 .button-label {
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 1px;
+  line-height: 1;
 }
