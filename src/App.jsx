@@ -1,4 +1,5 @@
 import React from 'react';
+import './App.css';
 import Button from './components/Button';
 
 import DiscoveryIcon from './assets/Discovery.svg';

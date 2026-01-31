@@ -2,9 +2,12 @@
 import React from 'react';
 import './button.css';
 
-const Button = ({ label, icon, onClick }) => {
+const Button = ({ label, icon, onClick, isActive }) => {
   return (
-    <button className="custom-button" onClick={onClick}>
+    <button
+      className={`custom-button ${isActive ? 'active' : ''}`}
+      onClick={onClick}
+    >
       {icon && (
         <span className="button-icon">
           {typeof icon === 'string' ? (

@@ -2,21 +2,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  width: 256px;
+  height: 68px;
+
   margin: 5px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
-  background-color: #f0f0f0;
+
+  background-color: #000000;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .custom-button:hover {
-  background-color: #e0e0e0;
-  border-color: #bbb;
+  background-color: #a0cefd;
+  border-color: #1f1c1c;
 }
 
 .custom-button:active {
@@ -28,6 +29,7 @@
   margin-right: 8px;
   font-weight: bold;
   font-size: 18px;
+  color: #ffffff;
 }
 
 .button-label {
