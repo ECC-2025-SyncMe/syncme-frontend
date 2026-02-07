@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "no-unused-vars": "error", // 사용하지 않는 변수 금지
+    "no-var": "error", // var 사용 금지, let/const 사용 권장
+    "eqeqeq": "error", // == 대신 === 사용 강제
+    "quotes": ["error", "single"], // 작은따옴표 사용 강제
+    "curly": "error", // 중괄호 사용 강제(가독성)
+
+    "no-console": "off", // console.log(), console.error() 사용 허용
+  },
+}
