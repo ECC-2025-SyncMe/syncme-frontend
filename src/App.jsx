@@ -8,7 +8,7 @@ import FriendsIcon from './assets/Friends.svg';
 import SettingsIcon from './assets/Settings.svg';
 
 import Setting from './pages/Setting';
-import Update from './pages/Update';
+import Update from './pages/UpdatePage';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 
 function AppLayout() {
