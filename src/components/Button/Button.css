@@ -2,8 +2,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 256px;
-  height: 68px;
+  width: 256vw;
+  min-height: 68dvh;
 
   margin: 5px;
   font-size: 16px;
@@ -19,7 +19,6 @@
   background-color: #a0cefd;
   border-color: #1f1c1c;
 }
-
 .custom-button:active {
   background-color: #d0d0d0;
   transform: scale(0.98);
@@ -34,4 +33,24 @@
 
 .button-label {
   line-height: 1;
+}
+
+/* 대형 크기의 화면: 따로 스타일링 지정X = 1rem은 기본적으로 16px */
+
+/* 중간 크기의 화면: 1rem을 10px로 조정 */
+@media (min-width: 500px) and (max-width: 1024px) {
+  html {
+    font-size: 62.5%;
+  }
+}
+
+/* 소형 화면: 1rem을 8px로 조정 */
+@media (min-width: 100px) and (max-width: 500px) {
+  html {
+    font-size: 50%;
+  }
+}
+
+div {
+  width: 10rem; /* html에 따라 160px, 100px, 80px로 자동 변환 */
 }
