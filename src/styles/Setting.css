@@ -1,0 +1,75 @@
+.setting-page {
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.setting-main {
+  flex: 1;
+  padding: 4rem;
+}
+
+/* profile */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.profile-img {
+  width: 5rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 0.25rem solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-email {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* menu */
+.menu {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.menu-item {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.divider {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  max-width: 32rem;
+}
+
+.footer-menu {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+.footer-menu button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* bottom button */
+.setting-bottom {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2rem 4rem;
+}

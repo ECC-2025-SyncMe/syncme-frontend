@@ -7,10 +7,12 @@ import UpdateIcon from './assets/Update.svg';
 import FriendsIcon from './assets/Friends.svg';
 import SettingsIcon from './assets/Settings.svg';
 
-function App() {
-  const handleButtonClick = (label) => {
-    console.log(`${label} 버튼이 클릭되었습니다.`);
-  };
+import Setting from './pages/Setting';
+import Update from './pages/Update';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+
+function AppLayout() {
+  const navigate = useNavigate();
 
   return (
     <div className="app-container">
@@ -18,26 +20,40 @@ function App() {
         <Button
           label="HOME"
           icon={DiscoveryIcon}
-          onClick={() => handleButtonClick('HOME')}
+          onClick={() => navigate('/home')}
         />
         <Button
           label="UPDATE"
           icon={UpdateIcon}
-          onClick={() => handleButtonClick('UPDATE')}
+          onClick={() => navigate('/update')}
         />
         <Button
           label="FRIENDS"
           icon={FriendsIcon}
-          onClick={() => handleButtonClick('FRIENDS')}
+          onClick={() => navigate('/friends')}
         />
         <Button
           label="SETTINGS"
           icon={SettingsIcon}
-          onClick={() => handleButtonClick('SETTINGS')}
+          onClick={() => navigate('/setting')}
         />
       </nav>
+
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/friends" element={<Friends />} />
+        <Route path="/setting" element={<Setting />} />
+        <Route path="/update" element={<Update />} />
+      </Routes>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
+  );
+}
