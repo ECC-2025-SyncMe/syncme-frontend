@@ -8,22 +8,23 @@
   width: 100dvw;
   min-height: 100dvh;
   display: flex;
+  justify-content: center;
   margin: auto;
   align-items: center;
 }
 .nav-bar {
+  position: fixed;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 2.4rem;
 
-  width: 102.4rem;
-  height: 6.8rem;
+  width: 90vw;
+  height: 56px;
+  padding: 0 16px;
 
   display: flex;
   align-items: center;
-  justify-content: space-around;
-
+  /*justify-content: space-around;*/
+  justify-content: center;
   background-color: #000000;
-  border-radius: 1.6rem;
-  padding: 0 4rem;
 }

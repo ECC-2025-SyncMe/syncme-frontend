@@ -1,5 +1,4 @@
 // home, status, settings 버튼에 사용되는 공통 버튼 컴포넌트
-import React from 'react';
 import './button.css';
 
 const Button = ({ label, icon, onClick, isActive }) => {
