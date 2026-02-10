@@ -6,8 +6,8 @@ import UpdateIcon from './assets/Update.svg';
 import FriendsIcon from './assets/Friends.svg';
 import SettingsIcon from './assets/Settings.svg';
 
-import Setting from './pages/Setting';
-// import Update from './pages/UpdatePage';
+import Setting from './pages/SettingPage';
+import Login from './pages/LoginPage';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 
 function AppLayout() {
@@ -39,11 +39,11 @@ function AppLayout() {
       </nav>
 
       <Routes>
-        {/*<Route path="/" element={<Login />} />*/}
+        <Route path="/" element={<Login />} />
         {/*<Route path="/home" element={<Home />} />*/}
+        {/*<Route path="/update" element={<Update />} />*/}
         {/*<Route path="/friends" element={<Friends />} />*/}
         <Route path="/setting" element={<Setting />} />
-        {/*<Route path="/update" element={<Update />} />*/}
       </Routes>
     </div>
   );

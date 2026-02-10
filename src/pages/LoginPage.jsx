@@ -1,5 +1,7 @@
 // 로그인 페이지
 import '../styles/Login.css';
+import Logo from '../assets/Logo.png';
+import Loginbtn from '../assets/Google_Login_btn.png';
 
 export default function Login() {
   const handleGoogleLogin = () => {
@@ -7,5 +9,20 @@ export default function Login() {
     console.log('Google 로그인 시도');
   };
 
-  return <div className="login-page"></div>;
+  return (
+    <div className="login-container">
+      <div className="login-content">
+        {/* 로고 이미지 */}
+        <div className="logo">
+          <img src={Logo} alt="SyncMe Logo" className="main-logo" />
+        </div>
+
+        <div className="login-button">
+          <button onClick={handleGoogleLogin} className="google-login-btn">
+            <img src={Loginbtn} alt="Google Icon" className="google-logo" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
