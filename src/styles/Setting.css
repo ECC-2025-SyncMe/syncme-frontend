@@ -66,10 +66,3 @@
   color: inherit;
   cursor: pointer;
 }
-
-/* bottom button */
-.setting-bottom {
-  display: flex;
-  justify-content: flex-end;
-  padding: 2rem 4rem;
-}
