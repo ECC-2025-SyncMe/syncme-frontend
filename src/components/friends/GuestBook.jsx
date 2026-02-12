@@ -23,7 +23,7 @@ export default function GuestBook({ wallUser, isMe, onSaveComment }) {
             </div>
 
             <WallList>
-                {wallUser.comments.map(c => (
+                {wallUser.comments || [].map(c => (
                     <CommentBubble key={c.id}>
                         <span className="writer">{c.writer}</span>
                         <div className="text">{c.text}</div>
