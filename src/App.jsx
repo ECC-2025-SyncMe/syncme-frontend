@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 
 import Button from './components/Button';
@@ -7,6 +7,9 @@ import Button from './components/Button';
 import Login from './pages/LoginPage';
 import Update from './pages/UpdatePage';
 import Setting from './pages/SettingPage';
+import Home from './pages/HomePage';
+import Friends from './pages/FriendsPage';
+
 
 // --- 아이콘 (react-icons 사용) ---
 // FaCompass(나침반/홈), FaSyncAlt(업데이트/새로고침), FaUserFriends(친구), FaCog(설정)
@@ -14,15 +17,16 @@ import { FaCompass, FaSyncAlt, FaUserFriends, FaCog } from 'react-icons/fa';
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="app-container">
       <div className="content-container">
         <Routes>
           <Route path="/" element={<Login />} />
-          {/*<Route path="/home" element={<Home />} />*/}
+          <Route path="/home" element={<Home />} />
           <Route path="/update" element={<Update />} />
-          {/*<Route path="/friends" element={<Friends />} />*/}
+          <Route path="/friends" element={<Friends />} />
           <Route path="/setting" element={<Setting />} />
         </Routes>
       </div>
