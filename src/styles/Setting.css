@@ -16,15 +16,18 @@
   align-items: center;
   gap: 1.5rem;
 }
-.profile-img {
+.user-img {
   width: 5rem;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   border-radius: 50%;
+  object-fit: cover;
+
   border: 0.25rem solid #fff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .profile-email {
   font-size: 1.5rem;
   font-weight: 500;
