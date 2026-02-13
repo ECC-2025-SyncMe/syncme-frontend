@@ -2,7 +2,7 @@
 import { FaBolt, FaWeightHanging, FaFire } from 'react-icons/fa';
 import '../styles/UpdatePage.css';
 import '../styles/State.css';
-import '../utils/dataUtiles.js';
+import '../utils/dateUtils.js';
 import { getCharacterMood } from '../utils/Characters/Character.js';
 
 import stress from '../assets/characters/stress.png';
