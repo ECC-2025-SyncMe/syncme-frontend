@@ -1,5 +1,5 @@
 // 로그인 페이지
-import '../styles/Login.css';
+import '../styles/LoginPage.css';
 import Logo from '../assets/Logo.png';
 import Loginbtn from '../assets/Google_Login_btn.png';
 

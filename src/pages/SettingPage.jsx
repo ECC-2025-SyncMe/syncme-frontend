@@ -1,5 +1,5 @@
 // 시스템 설정 페이지
-import '../styles/Setting.css';
+import '../styles/SettingPage.css';
 import User from '../assets/User.png';
 
 export default function SettingPage() {

@@ -1,6 +1,6 @@
 // Character 상태 페이지
 import { FaBolt, FaWeightHanging, FaFire } from 'react-icons/fa';
-import '../styles/Update.css';
+import '../styles/UpdatePage.css';
 import '../styles/State.css';
 import '../utils/dataUtiles.js';
 import { getCharacterMood } from '../utils/Characters/Character.js';
@@ -14,8 +14,8 @@ export default function UpdatePage() {
   // 임시 데이터
   const displayData = {
     stats: {
-      energy: 100,
-      burden: 90,
+      energy: 30,
+      burden: 20,
       passion: 90,
     },
   };
