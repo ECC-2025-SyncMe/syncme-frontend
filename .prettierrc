@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "tabWidth": 2,
   "useTabs": false,
@@ -6,3 +7,12 @@
   "trailingComma": "all",
   "printWidth": 80
 }
+=======
+{
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 80
+}
+>>>>>>> 8949830da6b6fd531183eb655cdc5df1d9f6b935
