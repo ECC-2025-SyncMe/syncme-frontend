@@ -1,7 +1,8 @@
 // 시스템 설정 페이지
-import '../styles/Setting.css';
+import '../styles/SettingPage.css';
+import User from '../assets/User.png';
 
-export default function Setting() {
+export default function SettingPage() {
   const userData = {
     email: 'ewha2026@ewhain.com',
   };
@@ -10,7 +11,9 @@ export default function Setting() {
     <div className="setting-page">
       <main className="setting-main">
         <section className="profile">
-          <div className="profile-img">{/* img icon */}</div>
+          <div className="profile-img">
+            <img src={User} className="user-img"></img>
+          </div>
           <span className="profile-email">{userData.email}</span>
         </section>
 

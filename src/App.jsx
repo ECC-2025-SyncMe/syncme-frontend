@@ -4,10 +4,12 @@ import './App.css';
 
 import Button from './components/Button';
 
+import Login from './pages/LoginPage';
+import Update from './pages/UpdatePage';
+import Setting from './pages/SettingPage';
 import Home from './pages/HomePage';
 import Friends from './pages/FriendsPage';
-import Setting from './pages/SettingPage';
-import Login from './pages/LoginPage';
+
 
 // --- 아이콘 (react-icons 사용) ---
 // FaCompass(나침반/홈), FaSyncAlt(업데이트/새로고침), FaUserFriends(친구), FaCog(설정)
@@ -23,6 +25,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/update" element={<Update />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/setting" element={<Setting />} />
         </Routes>
