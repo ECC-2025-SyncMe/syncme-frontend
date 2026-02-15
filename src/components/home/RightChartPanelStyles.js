@@ -37,7 +37,8 @@ export const ChartContainer = styled.div`
 
 export const ScoreContainer = styled.div`
   flex: 3;
-  min-height: 0;
+  width: 100%;
+  min-height: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;

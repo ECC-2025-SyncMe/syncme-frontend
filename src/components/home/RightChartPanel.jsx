@@ -22,7 +22,7 @@ export default function RightChartPanel({ historyData, score }) {
                 <ChartContainer>
                     <SectionTitle>최근 점수 변화 <span>Recent Score Changes</span></SectionTitle>
 
-                    {/* [수정 포인트] 데이터가 있을 때만 차트를 렌더링 */}
+                    {/* 데이터가 있을 때만 차트를 렌더링 */}
                     {hasHistory ? (
                         <ResponsiveContainer width="100%" height={150}>
                             <LineChart data={historyData.length > 0 ? historyData : [{ shortDate: '-', score: 0 }]}>

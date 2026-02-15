@@ -62,7 +62,7 @@ export default function UserProfile({ myInfo, isMe, showBack, onResetTarget }) {
     return (
         <>
             <LeftHeader>
-                {/* 2. !isMe 대신 showBack 조건으로 변경 */}
+                {/* !isMe 대신 showBack 조건으로 변경 */}
                 {showBack ? (
                     <BiArrowBack
                         onClick={onResetTarget}

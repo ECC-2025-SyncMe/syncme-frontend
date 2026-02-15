@@ -137,36 +137,63 @@ export default function Home() {
 
                 } else {
                     // --- 친구 홈 정보 가져오기 ---
-                    console.log("친구 홈 데이터 로딩 중... ID:", userId);
-                    const friendRes = await api.get(`/home/${userId}`);
-                    const resData = friendRes.data.data;
+                    try {
+                        const friendRes = await api.get(`/home/${userId}`);
+                        const resData = friendRes.data.data;
 
-                    if (resData) {
-                        setMyInfo(resData.user || resData); // user 객체가 없으면 통째로 저장
+                        if (resData) {
+                            // 유저 정보 세팅(resData 구조에 따라 유연하게 처리)
+                            const userInfo = resData.user || resData;
+                            setMyInfo(userInfo);
 
-                        const status = resData.status || null;
-                        if (status) {
+                            // 상태 점수 세팅
+                            const status = resData.status || null;
+
+                            // 데이터가 아예 없으면 기본값 33점 설정
+                            const currentScore = status ? (status.totalScore || status.score) : 33;
+                            const currentEnergy = status ? status.energy : 0;
+                            const currentBurden = status ? status.burden : 0;
+                            const currentPassion = status ? status.passion : 0;
+
                             setDisplayData({
-                                score: status.totalScore || status.score || 33, // 기본값 33점
+                                score: currentScore,
                                 stats: {
-                                    energy: status.energy || 0,
-                                    burden: status.burden || 0,
-                                    passion: status.passion || 0
+                                    energy: currentEnergy,
+                                    burden: currentBurden,
+                                    passion: currentPassion
                                 }
                             });
+
+                            // 그래프 데이터(historyData) 만들기
+                            // 만약 서버에서 history를 안 주면, 현재 상태(status)라도 하나 넣어서 점을 찍어줌
+                            let historyItems = [];
+
+                            if (resData.history && Array.isArray(resData.history)) {
+                                historyItems = resData.history;
+                            } else if (status) {
+                                // 히스토리 없으면 오늘(혹은 최근) 상태 하나라도 넣음
+                                historyItems = [status];
+                            } else {
+                                // 데이터가 없으면 기본 33점짜리 가짜 데이터라도 넣음(그래프 표시용)
+                                historyItems = [{
+                                    date: toDateStr(new Date()),
+                                    score: 33,
+                                    energy: 0, burden: 0, passion: 0
+                                }];
+                            }
+
+                            // 그래프용 데이터로 가공
+                            const chartData = historyItems.slice(-7).map(item => ({
+                                date: item.date,
+                                shortDate: item.date ? item.date.substring(5) : 'Today',
+                                score: item.totalScore || item.score || Math.round(((item.energy || 0) + (item.passion || 0) + (100 - (item.burden || 0))) / 3)
+                            }));
+
+                            setHistoryData(chartData);
                         }
+                    } catch (error) {
+                        console.error("친구 데이터 로드 실패:", error);
                     }
-
-                    // 친구의 히스토리 데이터가 있다면 차트에 반영
-                    // resData.history가 배열로 온다고 가정하거나, 현재 status라도 배열에 넣어줌
-                    const friendHistory = resData.history || (status ? [status] : []);
-
-                    const chartData = friendHistory.slice(-4).map(item => ({
-                        date: item.date || toDateStr(new Date()),
-                        shortDate: (item.date || "").substring(5) || "Today",
-                        score: item.totalScore || item.score || 33
-                    }));
-                    setHistoryData(chartData);
 
                 }
             } catch (error) {
