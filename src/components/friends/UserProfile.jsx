@@ -14,12 +14,13 @@ import neutral from '../../assets/characters/neutral.png';
 
 const moodImg = { stress, burning, happy, neutral };
 
-export default function UserProfile({ myInfo, isMe, onResetTarget }) {
+export default function UserProfile({ myInfo, isMe, showBack, onResetTarget }) {
     const [summary, setSummary] = useState('');
 
     useEffect(() => {
         const fetchSummary = async () => {
             try {
+                // 이제 여기서 isMe는 항상 true이므로 내 요약 정보를 잘 가져옵니다.
                 if (isMe) {
                     const res = await api.get('/character/summary');
                     if (res.data.success) {
@@ -31,14 +32,12 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                     setSummary(typeof friendSummary === 'object' ? friendSummary.text : (friendSummary || "오늘의 기록이 없습니다."));
                 }
             } catch (error) {
-                console.error("요약 정보 불러오기 실패:", error);
                 setSummary("오늘 하루를 기록해보세요!");
             }
         };
         fetchSummary();
     }, [isMe, myInfo]);
 
-    // 캐릭터 상태 계산 (myInfo 안에 status 정보가 있다고 가정)
     const mood = getCharacterMood(myInfo?.status || myInfo);
 
     const handleShare = async () => {
@@ -63,13 +62,15 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
     return (
         <>
             <LeftHeader>
-                {!isMe ? (
+                {/* 2. !isMe 대신 showBack 조건으로 변경 */}
+                {showBack ? (
                     <BiArrowBack
                         onClick={onResetTarget}
                         style={{ cursor: 'pointer', color: theme.colors.secondary }}
                         size={28}
                     />
                 ) : <div />}
+
                 <FaShareAlt
                     size={20}
                     color={theme.colors.secondary}

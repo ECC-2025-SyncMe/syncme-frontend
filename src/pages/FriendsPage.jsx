@@ -209,7 +209,8 @@ export default function Friends() {
             <Column className="left">
                 <UserProfile
                     myInfo={myProfile}
-                    isMe={isMe}
+                    isMe={true} // 왼쪽은 항상 '나'이므로 true로 고정
+                    showBack={target !== null} // 친구 담벼락을 보고 있을 때만 뒤로가기 버튼 표시
                     onResetTarget={() => setTarget(null)}
                 />
             </Column>
