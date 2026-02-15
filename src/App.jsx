@@ -1,11 +1,13 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 
 import Button from './components/Button';
 
 import Login from './pages/LoginPage';
+import Home from './pages/HomePage';
 import Update from './pages/UpdatePage';
+import Friends from './pages/FriendsPage';
 import Setting from './pages/SettingPage';
 
 // --- 아이콘 (react-icons 사용) ---
@@ -14,15 +16,16 @@ import { FaCompass, FaSyncAlt, FaUserFriends, FaCog } from 'react-icons/fa';
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="app-container">
       <div className="content-container">
         <Routes>
           <Route path="/" element={<Login />} />
-          {/*<Route path="/home" element={<Home />} />*/}
+          <Route path="/home" element={<Home />} />
           <Route path="/update" element={<Update />} />
-          {/*<Route path="/friends" element={<Friends />} />*/}
+          <Route path="/friends" element={<Friends />} />
           <Route path="/setting" element={<Setting />} />
         </Routes>
       </div>
