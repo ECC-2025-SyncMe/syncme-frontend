@@ -10,7 +10,7 @@ import FriendList from '../components/friends/FriendList';
 import GuestBook from '../components/friends/GuestBook';
 
 export default function Friends() {
-    // 1. 상태 변경: 초기값을 빈 배열/null로 설정 (데이터 오기 전까지 비워둠)
+    // 상태 변경: 초기값을 빈 배열/null로 설정 (데이터 오기 전까지 비워둠)
     const [friends, setFriends] = useState([]);
     const [myProfile, setMyProfile] = useState(null);
     const [loading, setLoading] = useState(true);

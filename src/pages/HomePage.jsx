@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // 1. 추가
+import { useParams } from 'react-router-dom';
 import api from '../api/axios';
 import { toDateStr } from '../utils/dateUtils';
 import { useCalendar } from '../hooks/useCalendar';
@@ -13,7 +13,7 @@ import CenterModelPanel from '../components/home/CenterModelPanel';
 import RightChartPanel from '../components/home/RightChartPanel';
 
 export default function Home() {
-    const { userId } = useParams(); // 2. URL 파라미터 가져오기
+    const { userId } = useParams(); //URL 파라미터 가져오기
     const isMe = !userId; // userId가 없으면 내 홈, 있으면 친구 홈
 
     const [myInfo, setMyInfo] = useState(null);
@@ -67,13 +67,13 @@ export default function Home() {
                 let statusData;
 
                 if (isMe) {
-                    // --- 3. 내 홈 정보 가져오기 ---
+                    // --- 내 홈 정보 가져오기 ---
                     const userRes = await api.get('/users/me');
                     const statusRes = await api.get('/status/today');
                     userData = userRes.data.data;
                     statusData = statusRes.data.data;
                 } else {
-                    // --- 4. 공유된 친구 홈 정보 가져오기 (GET /home/{userId}) ---
+                    // --- 공유된 친구 홈 정보 가져오기 (GET /home/{userId}) ---
                     const friendRes = await api.get(`/home/${userId}`);
                     // 백엔드 명세에 따라 friendRes.data.data 안에 
                     // 유저 정보와 상태 정보가 같이 들어있을 것으로 가정합니다.
