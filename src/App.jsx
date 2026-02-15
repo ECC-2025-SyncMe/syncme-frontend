@@ -10,13 +10,15 @@ import Update from './pages/UpdatePage';
 import Friends from './pages/FriendsPage';
 import Setting from './pages/SettingPage';
 
-// --- 아이콘 (react-icons 사용) ---
-// FaCompass(나침반/홈), FaSyncAlt(업데이트/새로고침), FaUserFriends(친구), FaCog(설정)
-import { FaCompass, FaSyncAlt, FaUserFriends, FaCog } from 'react-icons/fa';
+// 아이콘: FaGamepad로 변경됨
+import { FaCompass, FaGamepad, FaUserFriends, FaCog } from 'react-icons/fa';
 
 function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // 로그인 페이지인지 확인
+  const isLoginPage = location.pathname === '/';
 
   return (
     <div className="app-container">
@@ -40,7 +42,7 @@ function AppLayout() {
           />
           <Button
             label="UPDATE"
-            icon={<FaSyncAlt />}
+            icon={<FaGamepad />}
             onClick={() => navigate('/update')}
             isActive={location.pathname === '/update'}
           />

@@ -1,10 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BiArrowBack } from 'react-icons/bi';
 import { FaShareAlt } from 'react-icons/fa';
 import { theme } from '../../styles/theme';
 import { LeftHeader, ModelBox, IntroText } from './UserProfileStyles';
+import api from '../../api/axios';
 
 export default function UserProfile({ myInfo, isMe, onResetTarget }) {
+    const [summary, setSummary] = useState('');
+
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                if (isMe) {
+                    const res = await api.get('/character/summary');
+                    if (res.data.success) {
+                        // [수정 포인트] 데이터가 객체({ date, text })로 오므로 .text만 뽑아야 함!
+                        const data = res.data.data;
+                        if (typeof data === 'object' && data.text) {
+                            setSummary(data.text);
+                        } else {
+                            // 만약 그냥 문자열로 온다면 그대로 저장
+                            setSummary(data);
+                        }
+                    }
+                } else {
+                    // 친구 프로필의 경우
+                    // 만약 친구 데이터도 객체라면 .text 처리가 필요할 수 있음
+                    const friendSummary = myInfo.summary || myInfo.statusMessage;
+                    if (typeof friendSummary === 'object' && friendSummary.text) {
+                        setSummary(friendSummary.text);
+                    } else {
+                        setSummary(friendSummary || "오늘의 기록이 없습니다.");
+                    }
+                }
+            } catch (error) {
+                console.error("요약 정보 불러오기 실패:", error);
+                setSummary("오늘 하루를 기록해보세요!");
+            }
+        };
+
+        fetchSummary();
+    }, [isMe, myInfo]);
+
+    const handleShare = async () => {
+        try {
+            if (isMe) {
+                const res = await api.get('/home/me/share-link');
+                if (res.data.success) {
+                    const shareUrl = res.data.data.shareLink; // [수정] 명세서에 맞게 경로 수정
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert(`마이홈 링크가 복사되었습니다!\n${shareUrl}`);
+                }
+            } else {
+                // 친구 링크 공유 (userId가 있다면)
+                if (myInfo.userId) {
+                    const shareUrl = `https://syncme.app/home/${myInfo.userId}`;
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert(`친구의 마이홈 링크가 복사되었습니다!\n${shareUrl}`);
+                } else {
+                    alert("공유할 수 없는 사용자입니다.");
+                }
+            }
+        } catch (error) {
+            console.error("공유 링크 가져오기 실패:", error);
+            alert("공유 링크를 가져오는 중 오류가 발생했습니다.");
+        }
+    };
+
     return (
         <>
             <LeftHeader>
@@ -16,7 +78,14 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                         title="내 방명록으로 돌아가기"
                     />
                 ) : <div />}
-                <FaShareAlt size={20} color={theme.colors.secondary} style={{ cursor: 'pointer' }} onClick={() => alert("공유!")} />
+
+                <FaShareAlt
+                    size={20}
+                    color={theme.colors.secondary}
+                    style={{ cursor: 'pointer' }}
+                    onClick={handleShare}
+                    title="링크 공유하기"
+                />
             </LeftHeader>
 
             <h2 style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0 0 10px 0', lineHeight: '1' }}>
@@ -28,7 +97,8 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
             </ModelBox>
 
             <IntroText>
-                {myInfo.statusMessage || "상태 메시지가 없습니다."}
+                {/* 여기가 문제였던 곳입니다. 이제 summary가 문자열이라 안전합니다. */}
+                {summary || "로딩 중..."}
             </IntroText>
         </>
     );
