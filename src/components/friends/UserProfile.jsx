@@ -53,7 +53,7 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
             } else {
                 // 친구 링크 공유(userId가 있다면)
                 if (myInfo.userId) {
-                    const shareUrl = `https://syncme.app/home/${myInfo.userId}`;
+                    const shareUrl = `https://syncme-frontend.vercel.app/home/${myInfo.userId}`;
                     await navigator.clipboard.writeText(shareUrl);
                     alert(`친구의 마이홈 링크가 복사되었습니다!\n${shareUrl}`);
                 } else {

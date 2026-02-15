@@ -7,7 +7,7 @@ import { Container, Column } from './FriendsStyles';
 // 하위 컴포넌트 불러오기
 import UserProfile from '../components/friends/UserProfile';
 import FriendList from '../components/friends/FriendList';
-import GuestBook from '../components/friends/GuestBook';
+import GuestWall from '../components/friends/GuestWall';
 
 export default function Friends() {
     const [myProfile, setMyProfile] = useState(null);
@@ -92,8 +92,7 @@ export default function Friends() {
             const isAlreadyFollowing = followingList.some(f => f?.userId === friendId);
 
             if (isAlreadyFollowing) {
-                // [언팔로우 로직]
-                // UI 먼저 업데이트 (낙관적 업데이트: 사용자 경험 향상)
+                // UI 먼저 업데이트
                 setFollowingList(prev => prev.filter(f => f?.userId !== friendId));
 
                 // API 요청
@@ -106,7 +105,7 @@ export default function Friends() {
                 // 정보가 없으면 최소한의 ID라도 만듦
                 const newFriend = targetUser || { userId: friendId, nickname: 'Unknown' };
 
-                // UI 먼저 업데이트 (즉시 체크 표시 됨)
+                // UI 먼저 업데이트(즉시 체크 표시 됨)
                 setFollowingList(prev => [...prev, newFriend]);
 
                 // API 요청
@@ -156,15 +155,36 @@ export default function Friends() {
     const wallUser = target || myProfile;
     const isMe = target === null;
 
-    const handleSaveComment = (text) => {
-        const newComm = { id: Date.now(), writer: myProfile.nickname, text: text };
-        if (isMe) {
+    const handleSaveComment = async (text) => {
+        // 방어 코드: 내 프로필이나 타겟이 없으면 중단
+        if (isMe || !target) {
             alert("내 담벼락에는 글을 쓸 수 없습니다.");
-        } else {
-            setTarget(prev => ({
-                ...prev,
-                comments: [...(prev.comments || []), newComm]
-            }));
+            return;
+        }
+
+        try {
+            // 서버에 저장 요청
+            // (주의: 백엔드 API 주소 확인 필요)
+            const res = await api.post('/guestwall', {
+                targetUserId: target.userId, // 누구 담벼락에 쓸지
+                text: text                   // 내용
+            });
+
+            if (res.data.success) {
+                // 서버 저장이 성공하면, 서버가 돌려준 '완성된 댓글 데이터'를 화면에 추가
+                const newComment = res.data.data;
+
+                // 만약 서버 데이터 필드명이 프론트와 다르면 여기서 맞춰줘야 함
+                // 예: 서버는 content로 주는데 프론트는 text를 쓴다면 -> text: newComment.content
+
+                setTarget(prev => ({
+                    ...prev,
+                    comments: [...(prev.comments || []), newComment]
+                }));
+            }
+        } catch (error) {
+            console.error("방명록 저장 실패:", error);
+            alert("방명록을 저장하지 못했습니다.");
         }
     };
 
@@ -193,7 +213,7 @@ export default function Friends() {
             </Column>
 
             <Column className="right">
-                <GuestBook
+                <GuestWall
                     wallUser={wallUser}
                     isMe={isMe}
                     onSaveComment={handleSaveComment}

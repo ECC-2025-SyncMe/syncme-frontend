@@ -21,7 +21,6 @@ export default function Home() {
         stats: { energy: 0, burden: 0, passion: 0 }
     });
 
-    // 전체 기록(달력용)과 차트용 데이터(최근 4일) 분리
     const [allHistory, setAllHistory] = useState([]);
     const [historyData, setHistoryData] = useState([]);
 
@@ -35,22 +34,23 @@ export default function Home() {
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        // 오늘 날짜면 API 다시 호출(최신 상태 반영)
+        // 오늘 날짜
         if (targetStr === todayStr) {
             try {
                 const res = await api.get('/status/today');
                 if (res.data.success && res.data.data) {
                     const data = res.data.data;
-                    // 점수가 0이면 계산 로직 사용
-                    const calcScore = data.totalScore || Math.round((data.energy + data.passion + (100 - data.burden)) / 3);
+
+                    // 값이 없으면 0으로 처리 (|| 0)
+                    const energy = data.energy || 0;
+                    const burden = data.burden || 0;
+                    const passion = data.passion || 0;
+
+                    const calcScore = data.totalScore || Math.round((energy + passion + (100 - burden)) / 3);
 
                     setDisplayData({
                         score: calcScore,
-                        stats: {
-                            energy: data.energy || 0,
-                            burden: data.burden || 0,
-                            passion: data.passion || 0
-                        }
+                        stats: { energy, burden, passion }
                     });
                     return;
                 }
@@ -59,25 +59,24 @@ export default function Home() {
             }
         }
 
-        // 과거 날짜면 받아둔 히스토리(allHistory)에서 찾아서 표시
+        // 과거 날짜
         const foundData = allHistory.find(item => item.date === targetStr);
 
         if (foundData) {
-            // 점수 계산 
+            const energy = foundData.energy || 0;
+            const burden = foundData.burden || 0;
+            const passion = foundData.passion || 0;
+
             const calculatedScore = Math.round(
-                (foundData.energy + foundData.passion + (100 - foundData.burden)) / 3
+                (energy + passion + (100 - burden)) / 3
             );
 
             setDisplayData({
                 score: calculatedScore,
-                stats: {
-                    energy: foundData.energy,
-                    burden: foundData.burden,
-                    passion: foundData.passion
-                }
+                stats: { energy, burden, passion }
             });
         } else {
-            // 데이터가 없는 날짜
+            // 데이터 없음
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
@@ -89,70 +88,65 @@ export default function Home() {
             setLoading(true);
             try {
                 if (isMe) {
-                    // 내 정보 가져오기
                     const userRes = await api.get('/users/me');
                     setMyInfo(userRes.data.data);
 
-                    // 오늘 데이터 가져오기(변수에 저장해두고 히스토리와 합칠 예정)
+                    // --- 오늘 데이터 처리 ---
                     let todayData = null;
                     try {
                         const statusRes = await api.get('/status/today');
                         if (statusRes.data.success && statusRes.data.data) {
                             todayData = statusRes.data.data;
 
-                            // 메인 화면 점수 표시 (totalScore가 0이면 직접 계산)
+                            // 값이 null/undefined일 경우 0으로 강제 변환
+                            const energy = todayData.energy || 0;
+                            const burden = todayData.burden || 0;
+                            const passion = todayData.passion || 0;
+
                             const currentScore = todayData.totalScore || Math.round(
-                                (todayData.energy + todayData.passion + (100 - todayData.burden)) / 3
+                                (energy + passion + (100 - burden)) / 3
                             );
 
                             setDisplayData({
                                 score: currentScore,
-                                stats: {
-                                    energy: todayData.energy,
-                                    burden: todayData.burden,
-                                    passion: todayData.passion
-                                }
+                                stats: { energy, burden, passion }
                             });
                         }
                     } catch (e) {
                         console.log("오늘 기록 없음");
                     }
 
-                    // 히스토리 가져오기 및 차트 구성
+                    // --- 히스토리 처리 ---
                     try {
                         const historyRes = await api.get('/status/history');
                         let items = historyRes.data.data.items || [];
                         const todayStr = toDateStr(new Date());
 
-                        // 히스토리 목록에 오늘 날짜가 없으면 오늘 데이터를 강제로 추가
                         const hasToday = items.some(item => item.date === todayStr);
                         if (!hasToday && todayData) {
                             items.push({
                                 date: todayStr,
-                                energy: todayData.energy,
-                                burden: todayData.burden,
-                                passion: todayData.passion
+                                energy: todayData.energy || 0,
+                                burden: todayData.burden || 0,
+                                passion: todayData.passion || 0
                             });
                         }
 
-                        // 날짜 오름차순 정렬 (옛날 -> 최신)
                         items.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                        // 달력 점 찍기용 전체 데이터 저장
                         setAllHistory(items);
 
-                        // 차트용: 최근 4일치만 자르기 (.slice(-4))
-                        const recentItems = items.slice(-4);
+                        const recentItems = items.slice(-4); // 최근 4일
 
-                        // 차트 데이터 포맷팅
                         const chartData = recentItems.map(item => {
-                            const calculatedScore = Math.round(
-                                (item.energy + item.passion + (100 - item.burden)) / 3
-                            );
+                            const e = item.energy || 0;
+                            const p = item.passion || 0;
+                            const b = item.burden || 0;
+
+                            const calculatedScore = Math.round((e + p + (100 - b)) / 3);
 
                             return {
                                 date: item.date,
-                                shortDate: item.date.substring(5), // "02-15"
+                                shortDate: item.date.substring(5),
                                 score: calculatedScore
                             };
                         });
@@ -164,7 +158,7 @@ export default function Home() {
                     }
 
                 } else {
-                    // 친구 홈 로직
+                    // 친구 홈
                     const friendRes = await api.get(`/home/${userId}`);
                     const { user, status } = friendRes.data.data || {};
                     if (user) setMyInfo(user);
@@ -199,7 +193,6 @@ export default function Home() {
                 randomComment={randomComment}
                 {...calendar}
                 isReadOnly={!isMe}
-                // 전체 히스토리를 전달하여 달력에 점 표시
                 recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FaPen, FaPaperPlane } from 'react-icons/fa';
 import { theme } from '../../styles/theme';
-import { WallList, CommentBubble, InputArea, ToggleButton } from './GuestBookStyles';
+import { WallList, CommentBubble, InputArea, ToggleButton } from './GuestWallStyles';
 
-export default function GuestBook({ wallUser, isMe, onSaveComment }) {
+export default function GuestWall({ wallUser, isMe, onSaveComment }) {
     const [showInput, setShowInput] = useState(false);
     const [tempMsg, setTempMsg] = useState('');
 
