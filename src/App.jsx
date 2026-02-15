@@ -17,7 +17,6 @@ function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 로그인 페이지인지 확인
   const isLoginPage = location.pathname === '/';
 
   return (
@@ -25,20 +24,26 @@ function AppLayout() {
       <div className="content-container">
         <Routes>
           <Route path="/" element={<Login />} />
+
+          {/* 기본 홈 */}
           <Route path="/home" element={<Home />} />
+          {/* 친구/공유 홈: userId 파라미터를 동적으로 받음 */}
+          <Route path="/home/:userId" element={<Home />} />
+
           <Route path="/update" element={<Update />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/setting" element={<Setting />} />
         </Routes>
       </div>
 
-      {location.pathname !== '/' && (
+      {!isLoginPage && (
         <nav className="nav-bar">
           <Button
             label="HOME"
             icon={<FaCompass />}
             onClick={() => navigate('/home')}
-            isActive={location.pathname === '/home'}
+            // [수정 부분] /home으로 시작하면 활성화 표시
+            isActive={location.pathname.startsWith('/home')}
           />
           <Button
             label="UPDATE"
