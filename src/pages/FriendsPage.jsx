@@ -188,6 +188,22 @@ export default function Friends() {
         }
     };
 
+    const handleSelectFriend = async (friend) => {
+        try {
+            // 친구의 홈 정보를 가져와서 상태(status) 정보를 포함시킴
+            const res = await api.get(`/home/${friend.userId}`);
+            if (res.data.success) {
+                // 상세 정보를 target에 설정 (상태 데이터 포함됨)
+                setTarget(res.data.data);
+            } else {
+                setTarget(friend);
+            }
+        } catch (error) {
+            console.error("친구 정보 상세 로드 실패:", error);
+            setTarget(friend);
+        }
+    };
+
     return (
         <Container>
             <Column className="left">
@@ -206,7 +222,7 @@ export default function Friends() {
                     setActiveTab={setActiveTab}
                     getDisplayList={getDisplayList}
                     handleFollow={handleFollow}
-                    setTarget={setTarget}
+                    setTarget={handleSelectFriend}
                     followingCount={followingList.length}
                     followerCount={followerList.length}
                 />

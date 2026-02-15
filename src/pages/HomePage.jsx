@@ -11,6 +11,16 @@ import LeftStatPanel from '../components/home/LeftStatPanel';
 import CenterModelPanel from '../components/home/CenterModelPanel';
 import RightChartPanel from '../components/home/RightChartPanel';
 
+// 캐릭터 이미지 및 로직 추가
+import { getCharacterMood } from '../utils/Characters/Character.js';
+import stress from '../assets/characters/stress.png';
+import burning from '../assets/characters/burning.png';
+import happy from '../assets/characters/happy.png';
+import neutral from '../assets/characters/neutral.png';
+
+// 이미지 매핑 객체
+const moodImg = { stress, burning, happy, neutral };
+
 export default function Home() {
     const { userId } = useParams();
     const isMe = !userId; // userId가 없으면 내 홈, 있으면 친구 홈
@@ -170,9 +180,10 @@ export default function Home() {
                 recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>
-                {/* stats 데이터를 넘겨줄 때 null 방지 처리 */}
                 <LeftStatPanel stats={displayData.stats || { energy: 0, burden: 0, passion: 0 }} />
-                <CenterModelPanel />
+
+                <CenterModelPanel stats={displayData.stats || { energy: 0, burden: 0, passion: 0 }} />
+
                 <RightChartPanel historyData={historyData} score={displayData.score} />
             </DashboardGrid>
         </HomeContainer>

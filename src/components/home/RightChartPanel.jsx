@@ -20,7 +20,6 @@ export default function RightChartPanel({ historyData, score }) {
                         <LineChart data={historyData} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border} vertical={false} />
 
-                            {/* [수정] dataKey를 'shortDate'로 변경하여 MM-DD 형식으로 표시 */}
                             <XAxis
                                 dataKey="shortDate"
                                 stroke="#666"

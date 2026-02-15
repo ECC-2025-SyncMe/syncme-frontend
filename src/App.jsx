@@ -42,7 +42,6 @@ function AppLayout() {
             label="HOME"
             icon={<FaCompass />}
             onClick={() => navigate('/home')}
-            // [수정 부분] /home으로 시작하면 활성화 표시
             isActive={location.pathname.startsWith('/home')}
           />
           <Button
