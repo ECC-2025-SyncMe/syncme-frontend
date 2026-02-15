@@ -44,6 +44,7 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
     const handleShare = async () => {
         try {
             if (isMe) {
+                // 내 링크는 백엔드에서 생성해주는 공식 링크 사용
                 const res = await api.get('/home/me/share-link');
                 if (res.data.success) {
                     const shareUrl = res.data.data.shareLink;
@@ -51,9 +52,10 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                     alert(`마이홈 링크가 복사되었습니다!\n${shareUrl}`);
                 }
             } else {
-                // 친구 링크 공유(userId가 있다면)
-                if (myInfo.userId) {
-                    const shareUrl = `https://syncme-frontend.vercel.app/home/${myInfo.userId}`;
+                // 친구 링크 공유 시: 현재 접속한 도메인(window.location.origin)을 자동으로 가져옴
+                if (myInfo?.userId) {
+                    // 예: https://syncme-frontend.vercel.app + /home/ + u_6533...
+                    const shareUrl = `${window.location.origin}/home/${myInfo.userId}`;
                     await navigator.clipboard.writeText(shareUrl);
                     alert(`친구의 마이홈 링크가 복사되었습니다!\n${shareUrl}`);
                 } else {

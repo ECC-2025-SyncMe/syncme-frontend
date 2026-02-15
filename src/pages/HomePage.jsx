@@ -13,7 +13,7 @@ import RightChartPanel from '../components/home/RightChartPanel';
 
 export default function Home() {
     const { userId } = useParams();
-    const isMe = !userId;
+    const isMe = !userId; // userId가 없으면 내 홈, 있으면 친구 홈
 
     const [myInfo, setMyInfo] = useState(null);
     const [displayData, setDisplayData] = useState({
@@ -23,29 +23,24 @@ export default function Home() {
 
     const [allHistory, setAllHistory] = useState([]);
     const [historyData, setHistoryData] = useState([]);
-
     const [randomComment, setRandomComment] = useState({ writer: "SyncMe", text: "오늘 하루도 힘내세요!" });
     const [loading, setLoading] = useState(true);
 
-    // 날짜 클릭 시 (캘린더)
+    // 날짜 클릭 시 대시보드 업데이트 (내 홈에서만 작동)
     const updateDashboard = async (targetDate) => {
         if (!isMe) return;
 
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        // 오늘 날짜
         if (targetStr === todayStr) {
             try {
                 const res = await api.get('/status/today');
                 if (res.data.success && res.data.data) {
                     const data = res.data.data;
-
-                    // 값이 없으면 0으로 처리 (|| 0)
                     const energy = data.energy || 0;
                     const burden = data.burden || 0;
                     const passion = data.passion || 0;
-
                     const calcScore = data.totalScore || Math.round((energy + passion + (100 - burden)) / 3);
 
                     setDisplayData({
@@ -59,24 +54,18 @@ export default function Home() {
             }
         }
 
-        // 과거 날짜
         const foundData = allHistory.find(item => item.date === targetStr);
-
         if (foundData) {
             const energy = foundData.energy || 0;
             const burden = foundData.burden || 0;
             const passion = foundData.passion || 0;
-
-            const calculatedScore = Math.round(
-                (energy + passion + (100 - burden)) / 3
-            );
+            const calculatedScore = Math.round((energy + passion + (100 - burden)) / 3);
 
             setDisplayData({
                 score: calculatedScore,
                 stats: { energy, burden, passion }
             });
         } else {
-            // 데이터 없음
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
@@ -88,35 +77,28 @@ export default function Home() {
             setLoading(true);
             try {
                 if (isMe) {
+                    // --- 내 정보 및 오늘 상태 가져오기 ---
                     const userRes = await api.get('/users/me');
                     setMyInfo(userRes.data.data);
 
-                    // --- 오늘 데이터 처리 ---
                     let todayData = null;
                     try {
                         const statusRes = await api.get('/status/today');
                         if (statusRes.data.success && statusRes.data.data) {
                             todayData = statusRes.data.data;
-
-                            // 값이 null/undefined일 경우 0으로 강제 변환
                             const energy = todayData.energy || 0;
                             const burden = todayData.burden || 0;
                             const passion = todayData.passion || 0;
-
-                            const currentScore = todayData.totalScore || Math.round(
-                                (energy + passion + (100 - burden)) / 3
-                            );
+                            const currentScore = todayData.totalScore || Math.round((energy + passion + (100 - burden)) / 3);
 
                             setDisplayData({
                                 score: currentScore,
                                 stats: { energy, burden, passion }
                             });
                         }
-                    } catch (e) {
-                        console.log("오늘 기록 없음");
-                    }
+                    } catch (e) { console.log("오늘 기록 없음"); }
 
-                    // --- 히스토리 처리 ---
+                    // --- 히스토리 로드 ---
                     try {
                         const historyRes = await api.get('/status/history');
                         let items = historyRes.data.data.items || [];
@@ -135,42 +117,34 @@ export default function Home() {
                         items.sort((a, b) => new Date(a.date) - new Date(b.date));
                         setAllHistory(items);
 
-                        const recentItems = items.slice(-4); // 최근 4일
-
-                        const chartData = recentItems.map(item => {
-                            const e = item.energy || 0;
-                            const p = item.passion || 0;
-                            const b = item.burden || 0;
-
-                            const calculatedScore = Math.round((e + p + (100 - b)) / 3);
-
-                            return {
-                                date: item.date,
-                                shortDate: item.date.substring(5),
-                                score: calculatedScore
-                            };
-                        });
-
+                        const chartData = items.slice(-4).map(item => ({
+                            date: item.date,
+                            shortDate: item.date.substring(5),
+                            score: Math.round(((item.energy || 0) + (item.passion || 0) + (100 - (item.burden || 0))) / 3)
+                        }));
                         setHistoryData(chartData);
-
-                    } catch (e) {
-                        console.error("히스토리 로드 실패", e);
-                    }
+                    } catch (e) { console.error("히스토리 로드 실패", e); }
 
                 } else {
-                    // 친구 홈
+                    // --- 친구 홈 정보 가져오기 ---
+                    console.log("친구 홈 데이터 로딩 중... ID:", userId);
                     const friendRes = await api.get(`/home/${userId}`);
-                    const { user, status } = friendRes.data.data || {};
-                    if (user) setMyInfo(user);
-                    if (status) {
-                        setDisplayData({
-                            score: status.totalScore || 0,
-                            stats: {
-                                energy: status.energy || 0,
-                                burden: status.burden || 0,
-                                passion: status.passion || 0
-                            }
-                        });
+                    const resData = friendRes.data.data;
+
+                    if (resData) {
+                        setMyInfo(resData.user || resData); // user 객체가 없으면 통째로 저장
+
+                        const status = resData.status || null;
+                        if (status) {
+                            setDisplayData({
+                                score: status.totalScore || status.score || 33, // 기본값 33점
+                                stats: {
+                                    energy: status.energy || 0,
+                                    burden: status.burden || 0,
+                                    passion: status.passion || 0
+                                }
+                            });
+                        }
                     }
                 }
             } catch (error) {
@@ -183,8 +157,8 @@ export default function Home() {
         fetchInitialData();
     }, [userId, isMe]);
 
-    if (loading) return <div>로딩 중...</div>;
-    if (!myInfo) return <div>유저 정보를 찾을 수 없습니다.</div>;
+    if (loading) return <div style={{ color: '#fff', padding: '20px' }}>로딩 중...</div>;
+    if (!myInfo) return <div style={{ color: '#fff', padding: '20px' }}>유저 정보를 찾을 수 없습니다.</div>;
 
     return (
         <HomeContainer>
@@ -196,7 +170,8 @@ export default function Home() {
                 recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>
-                <LeftStatPanel stats={displayData.stats} />
+                {/* stats 데이터를 넘겨줄 때 null 방지 처리 */}
+                <LeftStatPanel stats={displayData.stats || { energy: 0, burden: 0, passion: 0 }} />
                 <CenterModelPanel />
                 <RightChartPanel historyData={historyData} score={displayData.score} />
             </DashboardGrid>
