@@ -10,102 +10,145 @@ import FriendList from '../components/friends/FriendList';
 import GuestBook from '../components/friends/GuestBook';
 
 export default function Friends() {
-    // 상태 변경: 초기값을 빈 배열/null로 설정 (데이터 오기 전까지 비워둠)
-    const [friends, setFriends] = useState([]);
     const [myProfile, setMyProfile] = useState(null);
+
+    // 친구 목록 상태 (팔로잉 / 팔로워)
+    const [followingList, setFollowingList] = useState([]);
+    const [followerList, setFollowerList] = useState([]);
+
+    // 검색 결과 상태
+    const [searchResults, setSearchResults] = useState([]);
+
+    const [target, setTarget] = useState(null); // 우측 패널에 띄울 유저
+    const [keyword, setKeyword] = useState('');
+    const [activeTab, setActiveTab] = useState('following'); // 'following' | 'followers'
     const [loading, setLoading] = useState(true);
 
-    const [target, setTarget] = useState(null);
-    const [keyword, setKeyword] = useState('');
-    const [activeTab, setActiveTab] = useState('following');
-
-    // 백엔드 데이터 불러오기(컴포넌트가 처음 뜰 때 1번 실행)
+    // 초기 데이터 로드 (내 정보 + 팔로잉 + 팔로워)
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             try {
-                // 내 정보(/users/me)와 친구 목록(/friends)을 동시에 요청
-                const [userRes, friendsRes] = await Promise.all([
+                const [userRes, followingRes, followerRes] = await Promise.all([
                     api.get('/users/me'),
-                    api.get('/friends')
+                    api.get('/friends/following'), // 내가 팔로우한 사람
+                    api.get('/friends/followers')  // 나를 팔로우한 사람
                 ]);
 
-                // 성공적으로 받아왔다면 상태 업데이트
-                if (userRes.data.success) {
-                    setMyProfile(userRes.data.data);
-                }
-                if (friendsRes.data.success) {
-                    setFriends(friendsRes.data.data);
-                }
+                if (userRes.data.success) setMyProfile(userRes.data.data);
+                if (followingRes.data.success) setFollowingList(followingRes.data.data);
+                if (followerRes.data.success) setFollowerList(followerRes.data.data);
+
             } catch (error) {
-                console.error("데이터 로딩 실패:", error);
-                // 403 에러가 뜨면 로그인이 안 된 상태
-                if (error.response?.status === 403) {
-                    alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
-                }
+                console.error("초기 데이터 로딩 실패:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
+        fetchInitialData();
     }, []);
 
-    // 팔로우/언팔로우 API 연결
-    const handleFollow = async (id) => {
-        try {
-            // 현재 팔로우 상태 확인
-            const friend = friends.find(f => f.id === id);
-            if (!friend) return;
-
-            if (friend.isFollowing) {
-                // 이미 팔로우 중이면 언팔로우(DELETE)
-                await api.delete(`/friends/${id}`);
-            } else {
-                // 아니면 팔로우 요청(POST)
-                await api.post(`/friends/${id}`);
+    // 검색 기능 (키워드가 바뀔 때마다 API 호출)
+    useEffect(() => {
+        const searchUsers = async () => {
+            if (!keyword.trim()) {
+                setSearchResults([]);
+                return;
             }
+            try {
+                // 검색 API 호출 (query=검색어&type=nickname)
+                const res = await api.get(`/users/search?query=${keyword}&type=nickname`);
+                if (res.data.success) {
+                    setSearchResults(res.data.data);
+                }
+            } catch (error) {
+                console.error("검색 실패:", error);
+            }
+        };
 
-            // 성공하면 화면(Local State)도 업데이트해줘야 깜빡임 없이 즉시 반영됨
-            setFriends(friends.map(f => f.id === id ? { ...f, isFollowing: !f.isFollowing } : f));
+        // 타이핑 멈추면 0.5초 뒤 검색 (디바운싱 효과)
+        const timer = setTimeout(() => {
+            searchUsers();
+        }, 500);
 
+        return () => clearTimeout(timer);
+    }, [keyword]);
+
+
+    // 팔로우 / 언팔로우 핸들러
+    const handleFollow = async (friendId) => {
+        try {
+            // 이미 팔로우 중인지 확인 (followingList에 있는지)
+            const isAlreadyFollowing = followingList.some(f => f.userId === friendId);
+
+            if (isAlreadyFollowing) {
+                // 언팔로우
+                await api.delete(`/friends/${friendId}`);
+                // 목록 업데이트
+                setFollowingList(prev => prev.filter(f => f.userId !== friendId));
+                alert("언팔로우 했습니다.");
+            } else {
+                // 팔로우
+                const res = await api.post(`/friends/${friendId}`);
+                if (res.data.success) {
+                    // API 응답값(새 친구 정보)을 리스트에 추가
+                    // 만약 응답에 user info가 없다면 다시 fetch 해야 함. 
+                    // 여기선 res.data.data가 팔로우된 유저 정보라고 가정.
+                    const newFriend = res.data.data;
+                    setFollowingList(prev => [...prev, newFriend]);
+                    alert("팔로우 했습니다!");
+                }
+            }
         } catch (error) {
-            console.error("팔로우 요청 실패:", error);
-            alert("요청을 처리할 수 없습니다.");
+            console.error("팔로우 처리 실패:", error);
+            alert("처리 중 오류가 발생했습니다.");
         }
     };
 
-    // 로딩 중일 때 처리(데이터가 없으면 에러가 나므로 필수)
-    if (loading || !myProfile) {
-        return <div style={{ padding: '20px', textAlign: 'center' }}>로딩 중입니다...</div>;
-    }
+    // 화면에 보여줄 리스트 결정 함수
+    const getDisplayList = () => {
+        // 검색어가 있으면 검색 결과 반환
+        if (keyword.trim()) {
+            return searchResults.map(user => ({
+                ...user,
+                // 검색 결과에 'isFollowing' 속성을 추가해서 버튼 모양 결정
+                isFollowing: followingList.some(f => f.userId === user.userId)
+            }));
+        }
 
-    // 데이터가 로드된 후 변수 할당
+        // 검색어가 없으면 탭에 따라 반환
+        if (activeTab === 'following') {
+            return followingList.map(user => ({ ...user, isFollowing: true }));
+        } else {
+            // 팔로워 목록 (내가 맞팔했는지 체크)
+            return followerList.map(user => ({
+                ...user,
+                isFollowing: followingList.some(f => f.userId === user.userId)
+            }));
+        }
+    };
+
+    if (loading || !myProfile) return <div>로딩 중...</div>;
+
     const wallUser = target || myProfile;
     const isMe = target === null;
 
-    const getDisplayList = () => {
-        // 친구 데이터 필터링 로직
-        if (keyword.trim()) return friends.filter(f => f.nickname.toLowerCase().includes(keyword.toLowerCase()));
-        return activeTab === 'following' ? friends.filter(f => f.isFollowing) : friends.filter(f => f.isFollower);
-    };
-
+    // 방명록 저장 (임시 UI)
     const handleSaveComment = (text) => {
-        // 방명록 API가 있다면 여기서 api.post('/guestbook', ...) 등을 호출해야 함
-        // 지금은 일단 화면에서만 바뀌도록 유지
         const newComm = { id: Date.now(), writer: myProfile.nickname, text: text };
-
         if (isMe) {
-            alert("내 담벼락에는 글을 남길 수 없습니다.");
+            alert("내 담벼락에는 글을 쓸 수 없습니다.");
         } else {
-            const updatedFriends = friends.map(f => f.id === target.id ? { ...f, comments: [...(f.comments || []), newComm] } : f);
-            setFriends(updatedFriends);
-            setTarget({ ...target, comments: [...(target.comments || []), newComm] });
+            // 실제로는 api.post(...) 필요
+            setTarget(prev => ({
+                ...prev,
+                comments: [...(prev.comments || []), newComm]
+            }));
         }
     };
 
     return (
         <Container>
-            {/* 왼쪽: 내 프로필 */}
             <Column className="left">
                 <UserProfile
                     myInfo={myProfile}
@@ -114,10 +157,9 @@ export default function Friends() {
                 />
             </Column>
 
-            {/* 중앙: 친구 목록 */}
             <Column className="center">
                 <FriendList
-                    friends={friends}
+                    // Props 전달 수정
                     keyword={keyword}
                     setKeyword={setKeyword}
                     activeTab={activeTab}
@@ -125,10 +167,12 @@ export default function Friends() {
                     getDisplayList={getDisplayList}
                     handleFollow={handleFollow}
                     setTarget={setTarget}
+                    // 탭에 숫자 표시용
+                    followingCount={followingList.length}
+                    followerCount={followerList.length}
                 />
             </Column>
 
-            {/* 오른쪽: 방명록 */}
             <Column className="right">
                 <GuestBook
                     wallUser={wallUser}
