@@ -12,31 +12,37 @@ import GuestBook from '../components/friends/GuestBook';
 export default function Friends() {
     const [myProfile, setMyProfile] = useState(null);
 
-    // 친구 목록 상태 (팔로잉 / 팔로워)
+    // 친구 목록 상태
     const [followingList, setFollowingList] = useState([]);
     const [followerList, setFollowerList] = useState([]);
 
     // 검색 결과 상태
     const [searchResults, setSearchResults] = useState([]);
 
-    const [target, setTarget] = useState(null); // 우측 패널에 띄울 유저
+    const [target, setTarget] = useState(null);
     const [keyword, setKeyword] = useState('');
-    const [activeTab, setActiveTab] = useState('following'); // 'following' | 'followers'
+    const [activeTab, setActiveTab] = useState('following');
     const [loading, setLoading] = useState(true);
 
-    // 초기 데이터 로드 (내 정보 + 팔로잉 + 팔로워)
+    // 1. 초기 데이터 로드
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 const [userRes, followingRes, followerRes] = await Promise.all([
                     api.get('/users/me'),
-                    api.get('/friends/following'), // 내가 팔로우한 사람
-                    api.get('/friends/followers')  // 나를 팔로우한 사람
+                    api.get('/friends/following'),
+                    api.get('/friends/followers')
                 ]);
 
                 if (userRes.data.success) setMyProfile(userRes.data.data);
-                if (followingRes.data.success) setFollowingList(followingRes.data.data);
-                if (followerRes.data.success) setFollowerList(followerRes.data.data);
+
+                // [안전장치] 데이터가 배열인지 확인하고 설정
+                if (followingRes.data.success && Array.isArray(followingRes.data.data)) {
+                    setFollowingList(followingRes.data.data);
+                }
+                if (followerRes.data.success && Array.isArray(followerRes.data.data)) {
+                    setFollowerList(followerRes.data.data);
+                }
 
             } catch (error) {
                 console.error("초기 데이터 로딩 실패:", error);
@@ -48,7 +54,7 @@ export default function Friends() {
         fetchInitialData();
     }, []);
 
-    // 검색 기능 (키워드가 바뀔 때마다 API 호출)
+    // 2. 검색 기능
     useEffect(() => {
         const searchUsers = async () => {
             if (!keyword.trim()) {
@@ -56,7 +62,6 @@ export default function Friends() {
                 return;
             }
             try {
-                // 검색 API 호출 (query=검색어&type=nickname)
                 const res = await api.get(`/users/search?query=${keyword}&type=nickname`);
                 if (res.data.success) {
                     setSearchResults(res.data.data);
@@ -66,7 +71,6 @@ export default function Friends() {
             }
         };
 
-        // 타이핑 멈추면 0.5초 뒤 검색 (디바운싱 효과)
         const timer = setTimeout(() => {
             searchUsers();
         }, 500);
@@ -75,25 +79,21 @@ export default function Friends() {
     }, [keyword]);
 
 
-    // 팔로우 / 언팔로우 핸들러
+    // 3. 팔로우 / 언팔로우 핸들러 [수정됨: 에러 원인 해결]
     const handleFollow = async (friendId) => {
         try {
-            // 이미 팔로우 중인지 확인 (followingList에 있는지)
-            const isAlreadyFollowing = followingList.some(f => f.userId === friendId);
+            // [핵심 수정] f?.userId 로 변경하여 f가 null일 경우 에러 방지
+            const isAlreadyFollowing = followingList.some(f => f?.userId === friendId);
 
             if (isAlreadyFollowing) {
                 // 언팔로우
                 await api.delete(`/friends/${friendId}`);
-                // 목록 업데이트
-                setFollowingList(prev => prev.filter(f => f.userId !== friendId));
+                setFollowingList(prev => prev.filter(f => f?.userId !== friendId));
                 alert("언팔로우 했습니다.");
             } else {
                 // 팔로우
                 const res = await api.post(`/friends/${friendId}`);
                 if (res.data.success) {
-                    // API 응답값(새 친구 정보)을 리스트에 추가
-                    // 만약 응답에 user info가 없다면 다시 fetch 해야 함. 
-                    // 여기선 res.data.data가 팔로우된 유저 정보라고 가정.
                     const newFriend = res.data.data;
                     setFollowingList(prev => [...prev, newFriend]);
                     alert("팔로우 했습니다!");
@@ -101,29 +101,29 @@ export default function Friends() {
             }
         } catch (error) {
             console.error("팔로우 처리 실패:", error);
-            alert("처리 중 오류가 발생했습니다.");
+            // 에러 상황을 알림
+            alert(error.response?.data?.message || "처리 중 오류가 발생했습니다.");
         }
     };
 
-    // 화면에 보여줄 리스트 결정 함수
+    // 화면에 보여줄 리스트 결정 함수 [수정됨: 에러 원인 해결]
     const getDisplayList = () => {
-        // 검색어가 있으면 검색 결과 반환
         if (keyword.trim()) {
             return searchResults.map(user => ({
                 ...user,
-                // 검색 결과에 'isFollowing' 속성을 추가해서 버튼 모양 결정
-                isFollowing: followingList.some(f => f.userId === user.userId)
+                // [핵심 수정] f?.userId 로 안전하게 접근
+                isFollowing: followingList.some(f => f?.userId === user.userId)
             }));
         }
 
-        // 검색어가 없으면 탭에 따라 반환
         if (activeTab === 'following') {
-            return followingList.map(user => ({ ...user, isFollowing: true }));
+            // null인 항목 제외하고(filter) 매핑
+            return followingList.filter(f => f != null).map(user => ({ ...user, isFollowing: true }));
         } else {
-            // 팔로워 목록 (내가 맞팔했는지 체크)
-            return followerList.map(user => ({
+            return followerList.filter(f => f != null).map(user => ({
                 ...user,
-                isFollowing: followingList.some(f => f.userId === user.userId)
+                // [핵심 수정] f?.userId
+                isFollowing: followingList.some(f => f?.userId === user.userId)
             }));
         }
     };
@@ -133,13 +133,11 @@ export default function Friends() {
     const wallUser = target || myProfile;
     const isMe = target === null;
 
-    // 방명록 저장 (임시 UI)
     const handleSaveComment = (text) => {
         const newComm = { id: Date.now(), writer: myProfile.nickname, text: text };
         if (isMe) {
             alert("내 담벼락에는 글을 쓸 수 없습니다.");
         } else {
-            // 실제로는 api.post(...) 필요
             setTarget(prev => ({
                 ...prev,
                 comments: [...(prev.comments || []), newComm]
@@ -159,7 +157,6 @@ export default function Friends() {
 
             <Column className="center">
                 <FriendList
-                    // Props 전달 수정
                     keyword={keyword}
                     setKeyword={setKeyword}
                     activeTab={activeTab}
@@ -167,7 +164,6 @@ export default function Friends() {
                     getDisplayList={getDisplayList}
                     handleFollow={handleFollow}
                     setTarget={setTarget}
-                    // 탭에 숫자 표시용
                     followingCount={followingList.length}
                     followerCount={followerList.length}
                 />
