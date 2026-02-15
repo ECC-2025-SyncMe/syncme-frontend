@@ -36,7 +36,6 @@ export default function Friends() {
 
                 if (userRes.data.success) setMyProfile(userRes.data.data);
 
-                // [안전장치] 데이터가 배열인지 확인하고 설정
                 if (followingRes.data.success && Array.isArray(followingRes.data.data)) {
                     setFollowingList(followingRes.data.data);
                 }
@@ -54,7 +53,7 @@ export default function Friends() {
         fetchInitialData();
     }, []);
 
-    // 2. 검색 기능
+    // 2. 검색 기능 (본인 제외 로직 추가)
     useEffect(() => {
         const searchUsers = async () => {
             if (!keyword.trim()) {
@@ -63,8 +62,10 @@ export default function Friends() {
             }
             try {
                 const res = await api.get(`/users/search?query=${keyword}&type=nickname`);
-                if (res.data.success) {
-                    setSearchResults(res.data.data);
+                if (res.data.success && Array.isArray(res.data.data)) {
+                    // [수정] 검색 결과에서 '나'는 제외하고 저장
+                    const filtered = res.data.data.filter(u => u.userId !== myProfile?.userId);
+                    setSearchResults(filtered);
                 }
             } catch (error) {
                 console.error("검색 실패:", error);
@@ -76,53 +77,76 @@ export default function Friends() {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [keyword]);
+    }, [keyword, myProfile]); // myProfile이 로드된 후 필터링 적용
 
 
-    // 3. 팔로우 / 언팔로우 핸들러 [수정됨: 에러 원인 해결]
+    // 3. 팔로우 / 언팔로우 핸들러 (UI 즉시 반영 로직 강화)
     const handleFollow = async (friendId) => {
+        if (myProfile?.userId === friendId) {
+            alert("자기 자신은 팔로우할 수 없습니다.");
+            return;
+        }
+
         try {
-            // [핵심 수정] f?.userId 로 변경하여 f가 null일 경우 에러 방지
+            // 현재 리스트에 있는지 확인
             const isAlreadyFollowing = followingList.some(f => f?.userId === friendId);
 
             if (isAlreadyFollowing) {
-                // 언팔로우
-                await api.delete(`/friends/${friendId}`);
+                // [언팔로우 로직]
+                // 1. UI 먼저 업데이트 (낙관적 업데이트: 사용자 경험 향상)
                 setFollowingList(prev => prev.filter(f => f?.userId !== friendId));
-                alert("언팔로우 했습니다.");
+
+                // 2. API 요청
+                await api.delete(`/friends/${friendId}`);
             } else {
-                // 팔로우
-                const res = await api.post(`/friends/${friendId}`);
-                if (res.data.success) {
-                    const newFriend = res.data.data;
-                    setFollowingList(prev => [...prev, newFriend]);
-                    alert("팔로우 했습니다!");
-                }
+                // [팔로우 로직]
+                // 검색 결과나 팔로워 목록에서 해당 유저의 전체 정보를 찾음
+                const targetUser = searchResults.find(u => u.userId === friendId)
+                    || followerList.find(u => u.userId === friendId);
+
+                // 정보가 없으면 최소한의 ID라도 만듦
+                const newFriend = targetUser || { userId: friendId, nickname: 'Unknown' };
+
+                // 1. UI 먼저 업데이트 (즉시 체크 표시 됨)
+                setFollowingList(prev => [...prev, newFriend]);
+
+                // 2. API 요청
+                await api.post(`/friends/${friendId}`);
             }
+
         } catch (error) {
             console.error("팔로우 처리 실패:", error);
-            // 에러 상황을 알림
-            alert(error.response?.data?.message || "처리 중 오류가 발생했습니다.");
+
+            // 실패 시 롤백(되돌리기)을 위해 목록을 다시 불러오는 것이 가장 안전
+            // 에러 메시지 띄우고 새로고침 유도 or 조용히 재조회
+            if (error.response?.status === 400) {
+                const msg = error.response.data?.message || "";
+                if (msg.includes("already")) {
+                    alert("이미 팔로우 된 상태입니다.");
+                }
+            }
+
+            // 에러가 나면 데이터 꼬임을 방지하기 위해 서버 데이터로 다시 동기화 추천
+            const syncRes = await api.get('/friends/following');
+            if (syncRes.data.success) setFollowingList(syncRes.data.data);
         }
     };
 
-    // 화면에 보여줄 리스트 결정 함수 [수정됨: 에러 원인 해결]
+    // 화면에 보여줄 리스트 결정 함수
     const getDisplayList = () => {
         if (keyword.trim()) {
             return searchResults.map(user => ({
                 ...user,
-                // [핵심 수정] f?.userId 로 안전하게 접근
+                // followingList에 내 userId가 있는지 확인하여 true/false 결정
                 isFollowing: followingList.some(f => f?.userId === user.userId)
             }));
         }
 
         if (activeTab === 'following') {
-            // null인 항목 제외하고(filter) 매핑
             return followingList.filter(f => f != null).map(user => ({ ...user, isFollowing: true }));
         } else {
             return followerList.filter(f => f != null).map(user => ({
                 ...user,
-                // [핵심 수정] f?.userId
                 isFollowing: followingList.some(f => f?.userId === user.userId)
             }));
         }
