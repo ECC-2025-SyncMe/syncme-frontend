@@ -4,24 +4,25 @@ import axios from 'axios';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// 요청 인터셉터: API 호출 시마다 토큰을 헤더에 담아 보냄
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
 );
 
 // 응답 인터셉터: 401 에러(토큰 만료) 발생 시 처리
@@ -91,7 +92,7 @@ const handleLogout = () => {
 
     alert('로그인 정보가 만료되었습니다. 다시 로그인해주세요.');
     // 페이지 새로고침하며 로그인 페이지로 이동
-    window.location.href = '/login';
+    window.location.href = '/';
 };
 
 export default api;

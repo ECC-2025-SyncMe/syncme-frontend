@@ -4,10 +4,11 @@ import './App.css';
 
 import Button from './components/Button';
 
+import Login from './pages/LoginPage';
 import Home from './pages/HomePage';
+import Update from './pages/UpdatePage';
 import Friends from './pages/FriendsPage';
 import Setting from './pages/SettingPage';
-import Login from './pages/LoginPage';
 
 // 아이콘: FaGamepad로 변경됨
 import { FaCompass, FaGamepad, FaUserFriends, FaCog } from 'react-icons/fa';
@@ -24,19 +25,14 @@ function AppLayout() {
       <div className="content-container">
         <Routes>
           <Route path="/" element={<Login />} />
-
           <Route path="/home" element={<Home />} />
-          {/* 친구 홈(공유 링크)으로 들어올 때 */}
-          <Route path="/home/:userId" element={<Home />} />
-
+          <Route path="/update" element={<Update />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/setting" element={<Setting />} />
-          {/* 업데이트 페이지 라우트가 필요하다면 아래 주석 해제 */}
-          {/* <Route path="/update" element={<UpdatePage />} /> */}
         </Routes>
       </div>
 
-      {!isLoginPage && (
+      {location.pathname !== '/' && (
         <nav className="nav-bar">
           <Button
             label="HOME"
