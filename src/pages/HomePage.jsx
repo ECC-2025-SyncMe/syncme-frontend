@@ -20,7 +20,11 @@ export default function Home() {
         score: 0,
         stats: { energy: 0, burden: 0, passion: 0 }
     });
+
+    // 전체 기록(달력용)과 차트용 데이터(최근 4일) 분리
+    const [allHistory, setAllHistory] = useState([]);
     const [historyData, setHistoryData] = useState([]);
+
     const [randomComment, setRandomComment] = useState({ writer: "SyncMe", text: "오늘 하루도 힘내세요!" });
     const [loading, setLoading] = useState(true);
 
@@ -31,29 +35,50 @@ export default function Home() {
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        if (targetStr !== todayStr) {
-            // 과거 데이터 조회 API (/status/history/{date})가 있다면 연결
-            // 현재는 0으로 초기화
-            setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
-            return;
+        // 오늘 날짜면 API 다시 호출(최신 상태 반영)
+        if (targetStr === todayStr) {
+            try {
+                const res = await api.get('/status/today');
+                if (res.data.success && res.data.data) {
+                    const data = res.data.data;
+                    // 점수가 0이면 계산 로직 사용
+                    const calcScore = data.totalScore || Math.round((data.energy + data.passion + (100 - data.burden)) / 3);
+
+                    setDisplayData({
+                        score: calcScore,
+                        stats: {
+                            energy: data.energy || 0,
+                            burden: data.burden || 0,
+                            passion: data.passion || 0
+                        }
+                    });
+                    return;
+                }
+            } catch (error) {
+                console.error("오늘 상태 불러오기 실패:", error);
+            }
         }
 
-        // 오늘 날짜로 돌아오면 다시 로드
-        try {
-            const res = await api.get('/status/today');
-            if (res.data.success && res.data.data) {
-                const data = res.data.data;
-                setDisplayData({
-                    score: data.totalScore || 0,
-                    stats: {
-                        energy: data.energy || 0,
-                        burden: data.burden || 0,
-                        passion: data.passion || 0
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("오늘 상태 불러오기 실패:", error);
+        // 과거 날짜면 받아둔 히스토리(allHistory)에서 찾아서 표시
+        const foundData = allHistory.find(item => item.date === targetStr);
+
+        if (foundData) {
+            // 점수 계산 
+            const calculatedScore = Math.round(
+                (foundData.energy + foundData.passion + (100 - foundData.burden)) / 3
+            );
+
+            setDisplayData({
+                score: calculatedScore,
+                stats: {
+                    energy: foundData.energy,
+                    burden: foundData.burden,
+                    passion: foundData.passion
+                }
+            });
+        } else {
+            // 데이터가 없는 날짜
+            setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
 
@@ -64,48 +89,76 @@ export default function Home() {
             setLoading(true);
             try {
                 if (isMe) {
-                    // 내 정보
+                    // 내 정보 가져오기
                     const userRes = await api.get('/users/me');
                     setMyInfo(userRes.data.data);
 
-                    // 오늘 상태
+                    // 오늘 데이터 가져오기(변수에 저장해두고 히스토리와 합칠 예정)
+                    let todayData = null;
                     try {
                         const statusRes = await api.get('/status/today');
                         if (statusRes.data.success && statusRes.data.data) {
-                            const data = statusRes.data.data;
+                            todayData = statusRes.data.data;
+
+                            // 메인 화면 점수 표시 (totalScore가 0이면 직접 계산)
+                            const currentScore = todayData.totalScore || Math.round(
+                                (todayData.energy + todayData.passion + (100 - todayData.burden)) / 3
+                            );
+
                             setDisplayData({
-                                score: data.totalScore || 0,
-                                stats: { energy: data.energy, burden: data.burden, passion: data.passion }
+                                score: currentScore,
+                                stats: {
+                                    energy: todayData.energy,
+                                    burden: todayData.burden,
+                                    passion: todayData.passion
+                                }
                             });
                         }
                     } catch (e) {
-                        // 오늘 기록이 없으면 0점 유지 (에러 아님)
                         console.log("오늘 기록 없음");
                     }
 
-                    // 차트 데이터 (History) 처리
+                    // 히스토리 가져오기 및 차트 구성
                     try {
                         const historyRes = await api.get('/status/history');
-                        // API 구조: { data: { count: 3, items: [...] } }
-                        const items = historyRes.data.data.items || [];
+                        let items = historyRes.data.data.items || [];
+                        const todayStr = toDateStr(new Date());
 
-                        // 날짜 오름차순 정렬 (과거 -> 오늘)
+                        // 히스토리 목록에 오늘 날짜가 없으면 오늘 데이터를 강제로 추가
+                        const hasToday = items.some(item => item.date === todayStr);
+                        if (!hasToday && todayData) {
+                            items.push({
+                                date: todayStr,
+                                energy: todayData.energy,
+                                burden: todayData.burden,
+                                passion: todayData.passion
+                            });
+                        }
+
+                        // 날짜 오름차순 정렬 (옛날 -> 최신)
                         items.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                        // 차트 데이터 변환
-                        const chartData = items.map(item => {
-                            // 점수 계산 로직: (에너지 + 열정 + (100-부담)) / 3
-                            // burden은 낮을수록 좋으므로 100에서 뺌
+                        // 달력 점 찍기용 전체 데이터 저장
+                        setAllHistory(items);
+
+                        // 차트용: 최근 4일치만 자르기 (.slice(-4))
+                        const recentItems = items.slice(-4);
+
+                        // 차트 데이터 포맷팅
+                        const chartData = recentItems.map(item => {
                             const calculatedScore = Math.round(
                                 (item.energy + item.passion + (100 - item.burden)) / 3
                             );
 
                             return {
-                                date: item.date.substring(5), // "2026-01-21" -> "01-21"
+                                date: item.date,
+                                shortDate: item.date.substring(5), // "02-15"
                                 score: calculatedScore
                             };
                         });
+
                         setHistoryData(chartData);
+
                     } catch (e) {
                         console.error("히스토리 로드 실패", e);
                     }
@@ -113,10 +166,7 @@ export default function Home() {
                 } else {
                     // 친구 홈 로직
                     const friendRes = await api.get(`/home/${userId}`);
-                    // 백엔드 응답 구조에 따라 수정 (friendRes.data.data 안에 user, status가 있는지 확인)
-                    // 가령 friendRes.data.data = { user: {...}, status: {...} } 라고 가정
                     const { user, status } = friendRes.data.data || {};
-
                     if (user) setMyInfo(user);
                     if (status) {
                         setDisplayData({
@@ -149,8 +199,8 @@ export default function Home() {
                 randomComment={randomComment}
                 {...calendar}
                 isReadOnly={!isMe}
-                // recordedDates prop이 필요하다면 historyData에서 추출해서 전달 가능
-                recordedDates={historyData.map(d => d.date)}
+                // 전체 히스토리를 전달하여 달력에 점 표시
+                recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>
                 <LeftStatPanel stats={displayData.stats} />

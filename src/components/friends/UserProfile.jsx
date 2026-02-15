@@ -14,7 +14,7 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                 if (isMe) {
                     const res = await api.get('/character/summary');
                     if (res.data.success) {
-                        // [수정 포인트] 데이터가 객체({ date, text })로 오므로 .text만 뽑아야 함!
+                        // 데이터가 객체({ date, text })로 오므로 .text
                         const data = res.data.data;
                         if (typeof data === 'object' && data.text) {
                             setSummary(data.text);
@@ -25,7 +25,6 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                     }
                 } else {
                     // 친구 프로필의 경우
-                    // 만약 친구 데이터도 객체라면 .text 처리가 필요할 수 있음
                     const friendSummary = myInfo.summary || myInfo.statusMessage;
                     if (typeof friendSummary === 'object' && friendSummary.text) {
                         setSummary(friendSummary.text);
@@ -47,12 +46,12 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
             if (isMe) {
                 const res = await api.get('/home/me/share-link');
                 if (res.data.success) {
-                    const shareUrl = res.data.data.shareLink; // [수정] 명세서에 맞게 경로 수정
+                    const shareUrl = res.data.data.shareLink;
                     await navigator.clipboard.writeText(shareUrl);
                     alert(`마이홈 링크가 복사되었습니다!\n${shareUrl}`);
                 }
             } else {
-                // 친구 링크 공유 (userId가 있다면)
+                // 친구 링크 공유(userId가 있다면)
                 if (myInfo.userId) {
                     const shareUrl = `https://syncme.app/home/${myInfo.userId}`;
                     await navigator.clipboard.writeText(shareUrl);
@@ -97,7 +96,6 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
             </ModelBox>
 
             <IntroText>
-                {/* 여기가 문제였던 곳입니다. 이제 summary가 문자열이라 안전합니다. */}
                 {summary || "로딩 중..."}
             </IntroText>
         </>

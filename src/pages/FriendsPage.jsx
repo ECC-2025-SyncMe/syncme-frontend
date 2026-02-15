@@ -24,7 +24,7 @@ export default function Friends() {
     const [activeTab, setActiveTab] = useState('following');
     const [loading, setLoading] = useState(true);
 
-    // 1. 초기 데이터 로드
+    // 초기 데이터 로드
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
@@ -53,7 +53,7 @@ export default function Friends() {
         fetchInitialData();
     }, []);
 
-    // 2. 검색 기능 (본인 제외 로직 추가)
+    // 검색 기능
     useEffect(() => {
         const searchUsers = async () => {
             if (!keyword.trim()) {
@@ -63,7 +63,7 @@ export default function Friends() {
             try {
                 const res = await api.get(`/users/search?query=${keyword}&type=nickname`);
                 if (res.data.success && Array.isArray(res.data.data)) {
-                    // [수정] 검색 결과에서 '나'는 제외하고 저장
+                    // 검색 결과에서 '나'는 제외하고 저장
                     const filtered = res.data.data.filter(u => u.userId !== myProfile?.userId);
                     setSearchResults(filtered);
                 }
@@ -80,7 +80,7 @@ export default function Friends() {
     }, [keyword, myProfile]); // myProfile이 로드된 후 필터링 적용
 
 
-    // 3. 팔로우 / 언팔로우 핸들러 (UI 즉시 반영 로직 강화)
+    // 팔로우 / 언팔로우 핸들러(UI 즉시 반영 로직 강화)
     const handleFollow = async (friendId) => {
         if (myProfile?.userId === friendId) {
             alert("자기 자신은 팔로우할 수 없습니다.");
@@ -93,13 +93,12 @@ export default function Friends() {
 
             if (isAlreadyFollowing) {
                 // [언팔로우 로직]
-                // 1. UI 먼저 업데이트 (낙관적 업데이트: 사용자 경험 향상)
+                // UI 먼저 업데이트 (낙관적 업데이트: 사용자 경험 향상)
                 setFollowingList(prev => prev.filter(f => f?.userId !== friendId));
 
-                // 2. API 요청
+                // API 요청
                 await api.delete(`/friends/${friendId}`);
             } else {
-                // [팔로우 로직]
                 // 검색 결과나 팔로워 목록에서 해당 유저의 전체 정보를 찾음
                 const targetUser = searchResults.find(u => u.userId === friendId)
                     || followerList.find(u => u.userId === friendId);
@@ -107,10 +106,10 @@ export default function Friends() {
                 // 정보가 없으면 최소한의 ID라도 만듦
                 const newFriend = targetUser || { userId: friendId, nickname: 'Unknown' };
 
-                // 1. UI 먼저 업데이트 (즉시 체크 표시 됨)
+                // UI 먼저 업데이트 (즉시 체크 표시 됨)
                 setFollowingList(prev => [...prev, newFriend]);
 
-                // 2. API 요청
+                // API 요청
                 await api.post(`/friends/${friendId}`);
             }
 
