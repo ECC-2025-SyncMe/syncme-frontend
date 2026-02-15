@@ -1,0 +1,134 @@
+.content-space {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+
+  margin-top: 70px;
+  gap: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stats-container {
+  align-items: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  height: 250px;
+  gap: 20px;
+  padding-top: 10%;
+}
+
+/* 상태 아이템 공통 */
+.stat-item {
+  width: 100%;
+}
+.stat-item .label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stat-item .name {
+  font-weight: 900;
+  font-size: 1rem;
+  flex: 1;
+  letter-spacing: 0.5px;
+}
+.stat-item .value {
+  font-weight: bold;
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.stat-item .bar-bg {
+  position: relative;
+  width: 100%;
+  height: 15px;
+  background: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  overflow: hidden;
+  /*pointer-events: none;*/
+}
+.stat-item .bar-bg:hover {
+  filter: brightness(1.1);
+}
+
+.stat-item .bar-fill {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 5px;
+  background-color: #ff4d4d;
+  z-index: 1;
+  pointer-events: none; /* ★ 중요: 바 자체가 클릭을 방해하지 않도록 함 */
+}
+.real-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 5; /* 앞으로 배치 */
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.save-btn {
+  padding: 10px;
+  margin-top: 20px;
+
+  color: white;
+  background-color: #5ba5e0;
+
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stat-item.energy .name,
+.stat-item.energy .icon {
+  color: #f3e524;
+}
+.stat-item.energy .bar-fill {
+  background: #f3e524;
+}
+.stat-item.pressure .name,
+.stat-item.pressure .icon {
+  color: #c23b21;
+}
+.stat-item.pressure .bar-fill {
+  background: #c23b21;
+}
+.stat-item.passion .name,
+.stat-item.passion .icon {
+  color: #ff8b01;
+}
+.stat-item.passion .bar-fill {
+  background: #ff8b01;
+}
+
+/* 캐릭터 이미지 컨테이너 */
+.character-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 350px;
+  height: auto;
+}
+.character-image {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+}
