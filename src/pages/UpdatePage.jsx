@@ -1,9 +1,9 @@
 // Character 상태 페이지
 import { useState, useEffect } from 'react';
-import { FaBolt, FaWeightHanging, FaFire } from 'react-icons/fa';
+import { FaBolt, FaWeightHanging, FaFire, FaSync } from 'react-icons/fa';
 import '../styles/UpdatePage.css';
 import '../styles/State.css';
-import '../utils/dataUtiles.js';
+import '../utils/dateUtils.js';
 import { getCharacterMood } from '../utils/Characters/Character.js';
 
 import stress from '../assets/characters/stress.png';
@@ -87,8 +87,9 @@ export default function UpdatePage() {
         </div>
 
         <div className="panel">
+
           <h3 className="section-title">
-            Date: {new Date().toLocaleDateString()}
+            {new Date().toLocaleDateString()}
             <br />
             오늘의 상태 <span>Status</span>
           </h3>
@@ -163,8 +164,8 @@ export default function UpdatePage() {
                 ></input>
               </div>
 
-              <button className="save-btn" onClick={updateApi.postTodayStatus}>
-                오늘 상태 저장하기
+              <button className="save-btn" onClick={() => updateApi.postTodayStatus(statusData)}>
+                <FaSync className={loading ? "spin" : ""} /> Sync
               </button>
 
               {/* 미리보기나 계산 버튼이 필요할 때 활용

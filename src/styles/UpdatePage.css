@@ -6,6 +6,8 @@
   justify-content: center;
   gap: 20px;
 }
+
+
 .username {
   font-size: 80px;
   font-weight: 900;
@@ -16,17 +18,18 @@
   letter-spacing: -1px;
   color: #f0f0f0;
 }
+
 .user-greeting {
   font-size: 80px;
   font-weight: 900;
 
   justify-content: center;
   letter-spacing: -1px;
-  color: #6399bd;
+  color: #A0CEFD;
 }
 
 .panel {
-  background: #4f5660;
+  background: #1a1a1a;
   border-radius: 24px;
   padding: 24px;
 
@@ -48,6 +51,7 @@
   font-weight: 600;
   align-content: center;
 }
+
 .section-title span {
   font-size: 0.8rem;
   opacity: 0.6;
