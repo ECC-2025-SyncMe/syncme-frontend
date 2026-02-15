@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom'; // 1. 추가
 import api from '../api/axios';
 import { toDateStr } from '../utils/dateUtils';
 import { useCalendar } from '../hooks/useCalendar';
@@ -12,65 +13,76 @@ import CenterModelPanel from '../components/home/CenterModelPanel';
 import RightChartPanel from '../components/home/RightChartPanel';
 
 export default function Home() {
+    const { userId } = useParams(); // 2. URL 파라미터 가져오기
+    const isMe = !userId; // userId가 없으면 내 홈, 있으면 친구 홈
+
     const [myInfo, setMyInfo] = useState(null);
     const [displayData, setDisplayData] = useState({
         score: 0,
         stats: { energy: 0, burden: 0, passion: 0 }
     });
-    const [historyData, setHistoryData] = useState([]); // 차트 데이터
+    const [historyData, setHistoryData] = useState([]);
     const [randomComment, setRandomComment] = useState({ writer: "SyncMe", text: "오늘 하루도 힘내세요!" });
     const [loading, setLoading] = useState(true);
 
     // 날짜가 바뀔 때 실행될 함수
     const updateDashboard = async (targetDate) => {
+        // 친구 홈일 때는 날짜 변경 기능을 일단 제한하거나 오늘 데이터만 고정
+        if (!isMe) return;
+
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        // 미래 날짜거나 오늘이 아니면 데이터가 없다고 가정(추후 날짜별 조회 API 필요)
         if (targetStr !== todayStr) {
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
             return;
         }
 
         try {
-            // 오늘 날짜 데이터 가져오기(/status/today)
             const res = await api.get('/status/today');
-
             if (res.data.success && res.data.data) {
                 const data = res.data.data;
                 setDisplayData({
-                    score: data.totalScore || 0, // 총점
+                    score: data.totalScore || 0,
                     stats: {
                         energy: data.energy || 0,
                         burden: data.burden || 0,
                         passion: data.passion || 0
                     }
                 });
-            } else {
-                // 오늘 기록이 없는 경우 0으로 초기화
-                setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
             }
         } catch (error) {
-            console.error("오늘 상태 불러오기 실패:", error);
-            // 404(데이터 없음) 에러는 정상이므로 0점으로 처리
+            console.error("상태 불러오기 실패:", error);
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
 
-    // --- Custom Hook 연결 ---
     const calendar = useCalendar(updateDashboard);
 
-    // 페이지 로드 시 '내 정보'와 '오늘 상태' 가져오기
     useEffect(() => {
         const fetchInitialData = async () => {
+            setLoading(true);
             try {
-                // 내 정보 가져오기(/users/me)
-                const userRes = await api.get('/users/me');
-                if (userRes.data.success) {
-                    const userData = userRes.data.data;
-                    setMyInfo(userData);
+                let userData;
+                let statusData;
 
-                    // 방명록(comments) 중 랜덤 하나
+                if (isMe) {
+                    // --- 3. 내 홈 정보 가져오기 ---
+                    const userRes = await api.get('/users/me');
+                    const statusRes = await api.get('/status/today');
+                    userData = userRes.data.data;
+                    statusData = statusRes.data.data;
+                } else {
+                    // --- 4. 공유된 친구 홈 정보 가져오기 (GET /home/{userId}) ---
+                    const friendRes = await api.get(`/home/${userId}`);
+                    // 백엔드 명세에 따라 friendRes.data.data 안에 
+                    // 유저 정보와 상태 정보가 같이 들어있을 것으로 가정합니다.
+                    userData = friendRes.data.data.user || friendRes.data.data;
+                    statusData = friendRes.data.data.status || friendRes.data.data;
+                }
+
+                if (userData) {
+                    setMyInfo(userData);
                     const comments = userData.comments || [];
                     if (comments.length > 0) {
                         const randomIdx = Math.floor(Math.random() * comments.length);
@@ -78,52 +90,51 @@ export default function Home() {
                     }
                 }
 
-                // 오늘 상태 데이터 가져오기(초기 실행)
-                await updateDashboard(new Date());
+                if (statusData) {
+                    setDisplayData({
+                        score: statusData.totalScore || statusData.score || 0,
+                        stats: {
+                            energy: statusData.energy || 0,
+                            burden: statusData.burden || 0,
+                            passion: statusData.passion || 0
+                        }
+                    });
+                }
 
-                // [차트용 히스토리] 
-                // 아직 '과거 기록 조회 API'가 없다면 일단 현재 점수만 보여주거나 빈 배열 처리
-                // 여기서는 임시로 오늘 점수만 차트에 표시하도록 설정
+                // 차트 데이터 초기화 (임시)
                 setHistoryData([
                     { date: '3일전', score: 0 },
                     { date: '2일전', score: 0 },
                     { date: '1일전', score: 0 },
-                    { date: '오늘', score: displayData?.score || 0 }
+                    { date: '오늘', score: statusData?.totalScore || 0 }
                 ]);
 
             } catch (error) {
-                console.error("초기 데이터 로딩 실패:", error);
+                console.error("데이터 로딩 실패:", error);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchInitialData();
-    }, []);
+    }, [userId, isMe]); // userId가 바뀌면 다시 로드
 
-    // 로딩 중일 때 표시
-    if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>데이터 불러오는 중...</div>;
+    if (loading) return <div style={{ padding: '20px', textAlign: 'center', color: '#fff' }}>데이터 불러오는 중...</div>;
+    if (!myInfo) return <div style={{ padding: '20px', textAlign: 'center', color: '#fff' }}>사용자를 찾을 수 없습니다.</div>;
 
-    // 내 정보가 아직 로드 안 됐으면 렌더링 안 함
-    if (!myInfo) return null;
-
-    // --- View (JSX) ---
     return (
         <HomeContainer>
             <DashboardHeader
                 myInfo={myInfo}
                 randomComment={randomComment}
                 {...calendar}
+                // 친구 홈일 때는 날짜 조절 UI를 숨기거나 읽기 전용으로 처리하도록 props 전달 가능
+                isReadOnly={!isMe}
             />
 
             <DashboardGrid>
-                {/* 실제 stats 데이터 전달 */}
                 <LeftStatPanel stats={displayData.stats} />
-
-                {/* 중앙 캐릭터 (데이터에 따라 표정 바뀌는 로직은 내부에 있음) */}
                 <CenterModelPanel />
-
-                {/* 차트와 점수 전달 */}
                 <RightChartPanel historyData={historyData} score={displayData.score} />
             </DashboardGrid>
         </HomeContainer>

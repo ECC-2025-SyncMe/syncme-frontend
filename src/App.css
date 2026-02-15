@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+/* App.css */
 * {
   margin: 0;
   padding: 0;
@@ -12,27 +12,39 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* 전체 스크롤 방지 */
+  position: relative;
 }
 
 .content-container {
   flex: 1;
   width: 100%;
   overflow-y: auto;
+  /* 이 영역 안에서만 스크롤 발생 */
   position: relative;
+  /* 내비바가 아래에 있으므로 내용이 가려지지 않게 하단 여백 추가 */
+  padding-bottom: 100px;
 }
 
+/* 원래 디자인 복구 */
 .nav-bar {
   flex-shrink: 0;
+  position: absolute;
+  /* 하단 고정을 위해 절대 위치 지정 */
+  bottom: 20px;
+  /* 바닥에서 20px 띄움 */
+  left: 50%;
+  transform: translateX(-50%);
+  /* 중앙 정렬 */
 
   width: 95%;
   max-width: 600px;
   height: 70px;
-  margin: 0 auto 20px auto;
   padding: 0 10px;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   background-color: #1a1a1a;
   border: 1px solid #333;
@@ -40,47 +52,3 @@
   z-index: 1000;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
-=======
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
->>>>>>> 8949830da6b6fd531183eb655cdc5df1d9f6b935
