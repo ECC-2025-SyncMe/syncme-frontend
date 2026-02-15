@@ -156,6 +156,18 @@ export default function Home() {
                             });
                         }
                     }
+
+                    // 친구의 히스토리 데이터가 있다면 차트에 반영
+                    // resData.history가 배열로 온다고 가정하거나, 현재 status라도 배열에 넣어줌
+                    const friendHistory = resData.history || (status ? [status] : []);
+
+                    const chartData = friendHistory.slice(-4).map(item => ({
+                        date: item.date || toDateStr(new Date()),
+                        shortDate: (item.date || "").substring(5) || "Today",
+                        score: item.totalScore || item.score || 33
+                    }));
+                    setHistoryData(chartData);
+
                 }
             } catch (error) {
                 console.error("데이터 로딩 실패:", error);

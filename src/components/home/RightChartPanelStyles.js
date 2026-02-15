@@ -11,6 +11,8 @@ export const Panel = styled.div`
   position: relative; 
   height: 100%; 
   box-sizing: border-box;
+
+  
 `;
 
 export const SectionTitle = styled.h3`
@@ -29,7 +31,8 @@ export const SectionTitle = styled.h3`
 
 export const ChartContainer = styled.div`
   flex: 2;
-  min-height: 0;
+  min-height: 150px; /* 에러 방지를 위해 최소 높이 고정 */
+  width: 100%;
 `;
 
 export const ScoreContainer = styled.div`
