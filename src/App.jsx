@@ -27,32 +27,34 @@ function AppLayout() {
         </Routes>
       </div>
 
-      <nav className="nav-bar">
-        <Button
-          label="HOME"
-          icon={<FaCompass />}
-          onClick={() => navigate('/home')}
-          isActive={location.pathname === '/home'}
-        />
-        <Button
-          label="UPDATE"
-          icon={<FaSyncAlt />}
-          onClick={() => navigate('/update')}
-          isActive={location.pathname === '/update'}
-        />
-        <Button
-          label="FRIENDS"
-          icon={<FaUserFriends />}
-          onClick={() => navigate('/friends')}
-          isActive={location.pathname === '/friends'}
-        />
-        <Button
-          label="SETTINGS"
-          icon={<FaCog />}
-          onClick={() => navigate('/setting')}
-          isActive={location.pathname === '/setting'}
-        />
-      </nav>
+      {location.pathname !== '/' && (
+        <nav className="nav-bar">
+          <Button
+            label="HOME"
+            icon={<FaCompass />}
+            onClick={() => navigate('/home')}
+            isActive={location.pathname === '/home'}
+          />
+          <Button
+            label="UPDATE"
+            icon={<FaSyncAlt />}
+            onClick={() => navigate('/update')}
+            isActive={location.pathname === '/update'}
+          />
+          <Button
+            label="FRIENDS"
+            icon={<FaUserFriends />}
+            onClick={() => navigate('/friends')}
+            isActive={location.pathname === '/friends'}
+          />
+          <Button
+            label="SETTINGS"
+            icon={<FaCog />}
+            onClick={() => navigate('/setting')}
+            isActive={location.pathname === '/setting'}
+          />
+        </nav>
+      )}
     </div>
   );
 }
