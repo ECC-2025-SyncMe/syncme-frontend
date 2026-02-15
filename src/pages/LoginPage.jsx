@@ -2,11 +2,6 @@
 import '../styles/LoginPage.css';
 import Logo from '../assets/Logo.png';
 import Loginbtn from '../assets/Google_Login_btn.png';
-import { useNavigate } from 'react-router-dom'; // 페이지 이동용
-import { useGoogleLogin } from '@react-oauth/google'; // 구글 로그인 훅
-import api from '../api/axios';
-
-import { googleLogin } from '../api/login';
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
@@ -32,7 +27,7 @@ export default function LoginPage() {
 
         <div className="login-button">
           {/* 버튼 클릭 시 googleLogin() 함수 실행 */}
-          <button onClick={() => googleLogin()} className="google-login-btn">
+          <button onClick={handleGoogleLogin} className="google-login-btn">
             <img src={Loginbtn} alt="Google Icon" className="google-logo" />
           </button>
         </div>
