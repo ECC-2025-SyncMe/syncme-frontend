@@ -61,6 +61,7 @@ export default function UpdatePage() {
 
   // 캐릭터 이미지 매핑
   const moodImg = { stress, burning, happy, neutral };
+  <img src={moodImg[getCharacterMood(statusData)]} />
 
   // 2. 슬라이더 값 변경 핸들러
   const handleSliderChange = async (e) => {
