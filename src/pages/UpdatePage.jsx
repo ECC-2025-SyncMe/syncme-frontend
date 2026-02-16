@@ -1,9 +1,9 @@
 // Character 상태 페이지
 import { useState, useEffect } from 'react';
-import { FaBolt, FaWeightHanging, FaFire } from 'react-icons/fa';
+import { FaBolt, FaWeightHanging, FaFire, FaSync } from 'react-icons/fa';
 import '../styles/UpdatePage.css';
 import '../styles/State.css';
-import '../utils/dataUtiles.js';
+import '../utils/dateUtils.js';
 import { getCharacterMood } from '../utils/Characters/Character.js';
 
 import stress from '../assets/characters/stress.png';
@@ -89,8 +89,9 @@ export default function UpdatePage() {
         </div>
 
         <div className="panel">
+
           <h3 className="section-title">
-            Date: {new Date().toLocaleDateString()}
+            {new Date().toLocaleDateString()}
             <br />
             오늘의 상태 <span>Status</span>
           </h3>

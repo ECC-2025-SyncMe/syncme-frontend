@@ -5,77 +5,69 @@ import { theme } from '../../styles/theme';
 import { LeftHeader, ModelBox, IntroText } from './UserProfileStyles';
 import api from '../../api/axios';
 
-export default function UserProfile({ myInfo, isMe, onResetTarget }) {
+// 캐릭터 로직 및 이미지 불러오기
+import { getCharacterMood } from '../../utils/Characters/Character.js';
+import stress from '../../assets/characters/stress.png';
+import burning from '../../assets/characters/burning.png';
+import happy from '../../assets/characters/happy.png';
+import neutral from '../../assets/characters/neutral.png';
+
+const moodImg = { stress, burning, happy, neutral };
+
+export default function UserProfile({ myInfo, isMe, showBack, onResetTarget }) {
     const [summary, setSummary] = useState('');
 
     useEffect(() => {
         const fetchSummary = async () => {
             try {
+                // 이제 여기서 isMe는 항상 true이므로 내 요약 정보를 잘 가져옵니다.
                 if (isMe) {
                     const res = await api.get('/character/summary');
                     if (res.data.success) {
-                        // [수정 포인트] 데이터가 객체({ date, text })로 오므로 .text만 뽑아야 함!
                         const data = res.data.data;
-                        if (typeof data === 'object' && data.text) {
-                            setSummary(data.text);
-                        } else {
-                            // 만약 그냥 문자열로 온다면 그대로 저장
-                            setSummary(data);
-                        }
+                        setSummary(typeof data === 'object' ? data.text : data);
                     }
                 } else {
-                    // 친구 프로필의 경우
-                    // 만약 친구 데이터도 객체라면 .text 처리가 필요할 수 있음
                     const friendSummary = myInfo.summary || myInfo.statusMessage;
-                    if (typeof friendSummary === 'object' && friendSummary.text) {
-                        setSummary(friendSummary.text);
-                    } else {
-                        setSummary(friendSummary || "오늘의 기록이 없습니다.");
-                    }
+                    setSummary(typeof friendSummary === 'object' ? friendSummary.text : (friendSummary || "오늘의 기록이 없습니다."));
                 }
             } catch (error) {
-                console.error("요약 정보 불러오기 실패:", error);
                 setSummary("오늘 하루를 기록해보세요!");
             }
         };
-
         fetchSummary();
     }, [isMe, myInfo]);
 
+    const mood = getCharacterMood(myInfo?.status || myInfo);
+
     const handleShare = async () => {
         try {
+            let shareUrl = "";
             if (isMe) {
                 const res = await api.get('/home/me/share-link');
-                if (res.data.success) {
-                    const shareUrl = res.data.data.shareLink; // [수정] 명세서에 맞게 경로 수정
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert(`마이홈 링크가 복사되었습니다!\n${shareUrl}`);
-                }
-            } else {
-                // 친구 링크 공유 (userId가 있다면)
-                if (myInfo.userId) {
-                    const shareUrl = `https://syncme.app/home/${myInfo.userId}`;
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert(`친구의 마이홈 링크가 복사되었습니다!\n${shareUrl}`);
-                } else {
-                    alert("공유할 수 없는 사용자입니다.");
-                }
+                if (res.data.success) shareUrl = res.data.data.shareLink;
+            } else if (myInfo?.userId) {
+                shareUrl = `${window.location.origin}/home/${myInfo.userId}`;
+            }
+
+            if (shareUrl) {
+                await navigator.clipboard.writeText(shareUrl);
+                alert(`링크가 복사되었습니다!\n${shareUrl}`);
             }
         } catch (error) {
-            console.error("공유 링크 가져오기 실패:", error);
-            alert("공유 링크를 가져오는 중 오류가 발생했습니다.");
+            alert("공유 링크 복사 실패");
         }
     };
 
     return (
         <>
             <LeftHeader>
-                {!isMe ? (
+                {/* !isMe 대신 showBack 조건으로 변경 */}
+                {showBack ? (
                     <BiArrowBack
                         onClick={onResetTarget}
                         style={{ cursor: 'pointer', color: theme.colors.secondary }}
                         size={28}
-                        title="내 방명록으로 돌아가기"
                     />
                 ) : <div />}
 
@@ -84,20 +76,30 @@ export default function UserProfile({ myInfo, isMe, onResetTarget }) {
                     color={theme.colors.secondary}
                     style={{ cursor: 'pointer' }}
                     onClick={handleShare}
-                    title="링크 공유하기"
                 />
             </LeftHeader>
 
-            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0 0 10px 0', lineHeight: '1' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0 0 10px 0', lineHeight: '1', color: '#fff' }}>
                 {myInfo.nickname}
             </h2>
 
-            <ModelBox>
-                My 3D Character
+            {/* ModelBox 내부에 이미지 출력 */}
+            <ModelBox style={{ overflow: 'hidden', padding: '10px' }}>
+                <img
+                    src={moodImg[mood]}
+                    alt="Character"
+                    style={{
+                        width: '100%',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        borderRadius: '20px',
+                        padding: '10px',
+                        transition: 'all 0.5s ease',
+                    }}
+                />
             </ModelBox>
 
             <IntroText>
-                {/* 여기가 문제였던 곳입니다. 이제 summary가 문자열이라 안전합니다. */}
                 {summary || "로딩 중..."}
             </IntroText>
         </>

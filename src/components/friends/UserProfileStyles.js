@@ -7,13 +7,25 @@ export const LeftHeader = styled.div`
 `;
 
 export const ModelBox = styled.div`
-  width: 100%; aspect-ratio: 1 / 1.1; 
-  background: #111; 
-  border: 1px dashed ${theme.colors.border}; 
-  border-radius: 20px;
-  margin: 10px 0 20px 0; 
-  display: flex; align-items: center; justify-content: center;
-  color: #444; font-weight: bold; font-size: 0.9rem;
+  width: 100%; 
+  aspect-ratio: 1 / 1.1; 
+  border-radius: 35px; 
+  margin: 10px 0 25px 0; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  position: relative;
+  
+  overflow: hidden; 
+
+  img {
+    width: 100%; 
+    height: 100%;
+    border-radius: 35px; 
+    object-fit: contain; 
+    transition: transform 0.3s ease;
+  
+  }
 `;
 
 export const IntroText = styled.p`

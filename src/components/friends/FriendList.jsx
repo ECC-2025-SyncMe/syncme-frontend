@@ -3,19 +3,22 @@ import { FaSearch, FaTimes, FaCheck, FaPlus, FaArrowRight } from 'react-icons/fa
 import { theme } from '../../styles/theme';
 import { SearchBar, TabContainer, TabButton, List, Item } from './FriendListStyles';
 
-const PROFILE_COLORS = ['#828282', '#A0CEFD', '#0088DD'];
-const getProfileColor = (id) => PROFILE_COLORS[id % PROFILE_COLORS.length] || PROFILE_COLORS[1];
+const PROFILE_COLORS = ['#828282', '#A0CEFD', '#0088DD', '#FFB6C1', '#98FB98'];
+const getProfileColor = (idx) => PROFILE_COLORS[idx % PROFILE_COLORS.length];
 
 export default function FriendList({
-    friends, keyword, setKeyword, activeTab, setActiveTab,
-    getDisplayList, handleFollow, setTarget
+    keyword, setKeyword, activeTab, setActiveTab,
+    getDisplayList, handleFollow, setTarget,
+    followingCount, followerCount
 }) {
+    const displayList = getDisplayList();
+
     return (
         <>
             <SearchBar>
                 <FaSearch style={{ marginRight: '10px', color: theme.colors.secondary }} />
                 <input
-                    placeholder="Search users..."
+                    placeholder="친구 닉네임 검색..."
                     value={keyword}
                     onChange={e => setKeyword(e.target.value)}
                 />
@@ -27,38 +30,48 @@ export default function FriendList({
                 )}
             </SearchBar>
 
+            {/* 검색 중이 아닐 때만 탭 표시 */}
             {!keyword && (
                 <TabContainer>
                     <TabButton active={activeTab === 'following'} onClick={() => setActiveTab('following')}>
-                        Following {friends.filter(f => f.isFollowing).length}
+                        Following {followingCount}
                     </TabButton>
                     <TabButton active={activeTab === 'followers'} onClick={() => setActiveTab('followers')}>
-                        Followers {friends.filter(f => f.isFollower).length}
+                        Followers {followerCount}
                     </TabButton>
                 </TabContainer>
             )}
 
             <List>
-                {getDisplayList().map(f => (
-                    <Item key={f.id} color={getProfileColor(f.id)}>
-                        <div className="profile-section">
-                            <div className="p-img" />
-                            <div className="info">
-                                <h4>{f.nickname}</h4>
-                                <p>{f.statusMessage || "No status"}</p>
+                {displayList.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                        {keyword ? "검색 결과가 없습니다." : "목록이 비어있습니다."}
+                    </div>
+                ) : (
+                    displayList.map((f, idx) => (
+                        // userId를 키로 사용
+                        <Item key={f.userId} color={getProfileColor(idx)}>
+                            <div className="profile-section">
+                                <div className="p-img" />
+                                <div className="info">
+                                    <h4>{f.nickname}</h4>
+                                    <p>{f.email || f.statusMessage || "SyncMe User"}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="actions">
-                            <div className={`icon-btn ${f.isFollowing ? 'check' : 'plus'}`}
-                                onClick={(e) => { e.stopPropagation(); handleFollow(f.id); }}>
-                                {f.isFollowing ? <FaCheck /> : <FaPlus />}
+                            <div className="actions">
+                                {/* 팔로우/언팔로우 버튼 */}
+                                <div className={`icon-btn ${f.isFollowing ? 'check' : 'plus'}`}
+                                    onClick={(e) => { e.stopPropagation(); handleFollow(f.userId); }}>
+                                    {f.isFollowing ? <FaCheck /> : <FaPlus />}
+                                </div>
+                                {/* 상세 보기(화살표) 버튼 */}
+                                <div className="icon-btn arrow" onClick={() => setTarget(f)}>
+                                    <FaArrowRight color={theme.colors.secondary} />
+                                </div>
                             </div>
-                            <div className="icon-btn arrow" onClick={() => setTarget(f)}>
-                                <FaArrowRight color={theme.colors.secondary} />
-                            </div>
-                        </div>
-                    </Item>
-                ))}
+                        </Item>
+                    ))
+                )}
             </List>
         </>
     );

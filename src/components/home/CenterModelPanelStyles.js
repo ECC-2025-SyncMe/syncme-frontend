@@ -2,10 +2,12 @@ import styled from '@emotion/styled';
 import { theme } from '../../styles/theme';
 
 export const CenterPanel = styled.div`
-  background: #0d0d0d; 
-  border-radius: 24px; 
-  border: 1px dashed ${theme.colors.border};
-  padding: 24px; 
+ 
+  /* [수정 포인트] 모서리를 기존보다 더 강조하여 둥글게 설정 */
+  border-radius: 40px; 
+  
+  border: none;
+  padding: 30px; 
   display: flex; 
   flex-direction: column; 
   align-items: center; 
@@ -14,8 +16,6 @@ export const CenterPanel = styled.div`
   height: 100%; 
   box-sizing: border-box;
 
-  h2 {
-    color: ${theme.colors.border}; /* #333 대신 테마 border 색상 사용 or textTertiary */
-    font-weight: bold;
-  }
+  /* 내부 요소가 모서리 밖으로 나가지 않게 설정 */
+  overflow: hidden;
 `;
