@@ -1,17 +1,21 @@
 export const getCharacterMood = (stats) => {
-  // 안전 장치: stats가 없을 경우 기본 객체 사용
-  const safeStats = stats || { energy: 0, burden: 0, passion: 0 };
+  // stats가 없거나 모든 수치가 0이면 '평온(neutral)' 또는 기본 상태 반환
+  if (!stats || (stats.energy === 0 && (stats.burden || stats.pressure) === 0 && stats.passion === 0)) {
+    return 'neutral';
+  }
 
-  // 데이터 키 이름이 energy, burden, passion인지 pressure인지 확인 필요
-  const { energy, burden, pressure, passion } = safeStats;
+  const energy = stats.energy || 0;
+  const pressure = stats.burden || stats.pressure || 0; // burden/pressure 혼용 대응
+  const passion = stats.passion || 0;
 
-  // burden이 없으면 pressure 사용
-  const actualBurden = burden || pressure || 0;
-
-  const avg = (energy + actualBurden + passion) / 3;
-
+  // 특수 상태 우선 체크
   if (energy < 30 && pressure > 70) return 'stress';
   if (passion > 80 && energy > 50) return 'burning';
-  if (energy > 70) return 'happy';
+
+  // 평균 및 주요 수치 체크
+  const avg = (energy + passion + (100 - pressure)) / 3;
+
+  if (avg > 70 || energy > 80) return 'happy';
+
   return 'neutral';
 };

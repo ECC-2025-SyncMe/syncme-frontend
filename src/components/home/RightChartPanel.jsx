@@ -89,7 +89,8 @@ export default function RightChartPanel({ historyData, score }) {
                                         <LabelList
                                             dataKey="value"
                                             position="insideTop"
-                                            fill="#ffffff"
+                                            fill={currentScore > 10 ? "#ffffff" : "transparent"} // 점수가 낮으면 글자 안보이게 처리하거나 위로 올림
+                                            formatter={(val) => val === 0 ? "" : val} // 0점일 땐 숫자 안보이게
                                             fontWeight="bold"
                                             fontSize={20}
                                             dy={10}
