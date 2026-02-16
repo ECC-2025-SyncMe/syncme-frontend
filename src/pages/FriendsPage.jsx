@@ -28,14 +28,32 @@ export default function Friends() {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [userRes, followingRes, followerRes] = await Promise.all([
+                // Promise.all에 댓글 조회 API(/comments/received) 추가
+                const [userRes, followingRes, followerRes, commentsRes] = await Promise.all([
                     api.get('/users/me'),
                     api.get('/friends/following'),
-                    api.get('/friends/followers')
+                    api.get('/friends/followers'),
+                    api.get('/comments/received') // 내가 받은 댓글 조회
                 ]);
 
-                if (userRes.data.success) setMyProfile(userRes.data.data);
+                let userData = null;
 
+                // 내 정보 세팅
+                if (userRes.data.success) {
+                    userData = userRes.data.data;
+                }
+
+                // 댓글 데이터가 있으면 내 정보에 'comments' 필드로 병합
+                if (commentsRes.data.success && userData) {
+                    userData.comments = commentsRes.data.data;
+                }
+
+                // 병합된 데이터를 상태에 저장
+                if (userData) {
+                    setMyProfile(userData);
+                }
+
+                // 팔로잉/팔로워 리스트 세팅
                 if (followingRes.data.success && Array.isArray(followingRes.data.data)) {
                     setFollowingList(followingRes.data.data);
                 }

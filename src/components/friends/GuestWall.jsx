@@ -30,11 +30,20 @@ export default function GuestWall({ wallUser, isMe, onSaveComment }) {
 
             <WallList>
                 {(wallUser.comments || []).map(c => (
-                    <CommentBubble key={c.id}>
-                        <span className="writer">{c.writer}</span>
-                        <div className="text">{c.text}</div>
+                    // key: commentId (없으면 id)
+                    <CommentBubble key={c.commentId || c.id}>
+                        {/* 작성자: authorNickname (없으면 writer) */}
+                        <span className="writer">{c.authorNickname || c.writer}</span>
+                        {/* 내용: content (없으면 text) */}
+                        <div className="text">{c.content || c.text}</div>
                     </CommentBubble>
                 ))}
+                {/* 댓글이 없을 경우 안내 메시지  */}
+                {(!wallUser.comments || wallUser.comments.length === 0) && (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                        아직 작성된 방명록이 없습니다.
+                    </div>
+                )}
             </WallList>
 
             {showInput && !isMe && (
@@ -43,7 +52,7 @@ export default function GuestWall({ wallUser, isMe, onSaveComment }) {
                         value={tempMsg}
                         onChange={(e) => setTempMsg(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSave()}
-                        placeholder="방명록을 남겨보세요"
+                        placeholder="담벼락에 글을 남겨보세요!"
                         autoFocus
                     />
                     <button onClick={handleSave}><FaPaperPlane /></button>
