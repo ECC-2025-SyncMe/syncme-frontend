@@ -77,12 +77,14 @@ export default function UpdatePage() {
   const handleSync = async () => {
     try {
       setLoading(true);
-      await updateApi.postTodayStatus(statusData);// 1. 상태 저장
+      await updateApi.postTodayStatus(statusData);// 상태 저장
+      await updateApi.calculateStatus();
 
-      const res = await updateApi.calculateStatus();// 2. 계산
-      setCalculatedStatus(res.data);
-    } catch (err) {
-      console.error(err);
+      const scoreRes = await updateApi.characterScore();
+      setCharacterScore(scoreRes.data.score);
+      alert('오늘의 상태를 저장하였습니다.')
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -100,8 +102,8 @@ export default function UpdatePage() {
             alt="Character Mood"
             className="character-image"
           />
-          {/* 캐릭터 점수 표시 (characterScore API 활용 예시) */}
-          <div className="character-score-badge">Score: {character.score}</div>
+          {/* 캐릭터 점수 표시 (characterScore API 활용 예시) 
+          <div className="character-score-badge">Score: {character.score}</div>*/}
         </div>
 
         <div className="panel">
