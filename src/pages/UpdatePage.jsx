@@ -41,7 +41,7 @@ export default function UpdatePage() {
           ]);
 
         setUserData(userRes.data);
-        setStatusData(statusRes.data || { energy: 0, burden: 0, passion: 0 });
+        setStatusData(statusRes.data || { energy: 0, pressure: 0, passion: 0 });
         // 캐릭터 상태와 요약 문장을 합쳐서 저장
         setCharacter({
           ...charRes.data,
@@ -57,9 +57,7 @@ export default function UpdatePage() {
     fetchData();
   }, []);
 
-  if (loading) {
-    return <div className="update-container">Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   // 캐릭터 이미지 매핑
   const moodImg = { stress, burning, happy, neutral };
