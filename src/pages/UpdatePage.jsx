@@ -13,6 +13,7 @@ import neutral from '../assets/characters/neutral.png';
 
 import * as updateApi from '../api/update.js';
 import { settingUserData } from '../api/setting.js';
+import { ChangeName } from '../api/setting.js';
 
 export default function UpdatePage() {
   // 데이터를 담을 상태(state) 생성
@@ -25,6 +26,20 @@ export default function UpdatePage() {
   const [character, setCharacter] = useState({ summary: '', score: 0 }); // characterStatus, characterSummary
   const [calculatedStatus, setCalculatedStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 1. 프로필 편집
+  const handleChangeName = async () => {
+    const newNickname = prompt('새 닉네임을 입력하세요:');
+    if (!newNickname) return;
+    try {
+      await ChangeName({ nickname: newNickname });
+      alert('닉네임이 변경되었습니다.');
+      setUserData((prev) => ({ ...prev, nickname: newNickname }));
+    } catch (error) {
+      console.error('닉네임 변경 실패:', error);
+      alert('닉네임 변경에 실패했습니다.');
+    }
+  };
 
   // API 호출 로직
   useEffect(() => {
@@ -92,7 +107,7 @@ export default function UpdatePage() {
 
   return (
     <div className="update-container">
-      <span className="username">{userData?.nickname || 'JANE'}, </span>
+      <span className="username" onClick={handleChangeName}>{userData?.nickname || 'JANE'}, </span>
       <span className="user-greeting">HOW ARE YOU?</span>
 
       <div className="content-space">
@@ -189,22 +204,6 @@ export default function UpdatePage() {
               <button className="save-btn" onClick={handleSync}>
                 <FaSync className={loading ? "spin" : ""} /> Sync
               </button>
-
-              {/* 미리보기나 계산 버튼이 필요할 때 활용
-              <button
-                className="preview-btn"
-                onClick={async () => {
-                  try {
-                    const res = await updateApi.calculatePreview();
-                    alert(`내 예상 상태: ${res.data.message}`);
-                  } catch (error) {
-                    console.error('미리보기 로드 실패:', error);
-                    alert('미리보기에 실패하였습니다. 다시 시도해주세요!');
-                  }
-                }}
-              >
-                결괏값 기반 미리보기
-              </button> */}
             </div>
           </div>
         </div>
