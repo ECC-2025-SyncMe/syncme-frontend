@@ -108,11 +108,11 @@ export default function UpdatePage() {
           <h3 className="section-title">
             {new Date().toLocaleDateString()}
             <br />
-            {/*오늘의 상태 <span>Status</span>*/}
+            오늘의 상태 <span>Status</span>
             {calculatedStatus && (
               <p className="char-summary">{calculatedStatus.summary}</p>
             )}
-            
+
           </h3>
 
           <div className="stats-container">

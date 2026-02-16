@@ -7,10 +7,10 @@ export const LeftHeader = styled.div`
 `;
 
 export const ModelBox = styled.div`
-  width: 100%; 
+  width: 85%; 
   aspect-ratio: 1 / 1.1; 
   border-radius: 35px; 
-  margin: 10px 0 25px 0; 
+  margin: 20px 0 25px 0; 
   display: flex; 
   align-items: center; 
   justify-content: center;
