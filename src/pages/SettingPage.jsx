@@ -9,6 +9,7 @@ import {
   ChangeName,
   settingLogout,
   DeleteAccount,
+  getUserInfo,
 } from '../api/setting';
 
 export default function SettingPage() {
@@ -34,16 +35,11 @@ export default function SettingPage() {
   // 이메일 정보
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const { data } = await getUserInfo();
-        setUserData(data);
-      } catch (error) {
-        console.error(error);
-      }
+      const res = await getUserInfo();
+      setUserData(res.data);
     };
     fetchUser();
   }, []);
-
 
   if (loading) {
     return <div className="setting-page">Loading...</div>;
@@ -52,17 +48,16 @@ export default function SettingPage() {
   // 1. 프로필 편집
   const handleChangeName = async () => {
     const newNickname = prompt('새 닉네임을 입력하세요:');
-    if (newNickname) {
+    if (!newNickname) return;
       try {
         await ChangeName({ nickname: newNickname });
         alert('닉네임이 변경되었습니다.');
-        window.location.reload(); // 페이지 새로고침으로 변경된 닉네임 반영
+        setUserData((prev) => ({ ...prev, nickname: newNickname }));
       } catch (error) {
         console.error('닉네임 변경 실패:', error);
         alert('닉네임 변경에 실패했습니다.');
       }
-    }
-  };
+    };
 
   // 2. 로그아웃
   const handleLogout = async () => {
