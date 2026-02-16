@@ -4,8 +4,8 @@ import axios from './axios';
 //export const fetchUserStats = async () => axios.get('/user/stats');
 
 export const getTodayStatus = async () => axios.get('/status/today'); // 오늘 상태 조회
-export const postTodayStatus = async () => axios.post('/status/today'); // 오늘 상태 업데이트(기록) //버튼
-export const patchTodayStatus = async () => axios.patch('/status/today'); // 오늘 상태 수정
+export const postTodayStatus = (data) => axios.post('/status/today', data); // 오늘 상태 업데이트(기록) //버튼
+export const patchTodayStatus = (data) => axios.patch('/status/today', data); // 오늘 상태 수정
 
 export const characterStatus = async () => axios.get('/character/current'); // 현재 캐릭터 상태
 export const characterScore = async () => axios.get('/character/score'); // 캐릭터 점수 조회

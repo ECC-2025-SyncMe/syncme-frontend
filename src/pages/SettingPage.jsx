@@ -35,8 +35,12 @@ export default function SettingPage() {
   // 이메일 정보
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await getUserInfo();
-      setUserData(res.data);
+      try{
+        const res = await getUserInfo();
+        setUserData(res.data);
+      } catch(error){
+        console.error(error);
+      }
     };
     fetchUser();
   }, []);
