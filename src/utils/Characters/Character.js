@@ -10,10 +10,8 @@ export const getCharacterMood = (stats) => {
 
   const avg = (energy + actualBurden + passion) / 3;
 
-  if (avg >= 90) return 'burning';
-  if (avg >= 70) return 'stress';
-  if (avg >= 45) return 'neutral';
-
-  // 기본값
-  return 'happy';
+  if (energy < 30 && pressure > 70) return 'stress';
+  if (passion > 80 && energy > 50) return 'burning';
+  if (energy > 70) return 'happy';
+  return 'neutral';
 };
