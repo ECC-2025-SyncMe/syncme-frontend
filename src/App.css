@@ -58,3 +58,15 @@
   z-index: 1000;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
+
+.app-container.is-login-page {
+  background-color: #80807f;
+}
+
+/* 로그인 페이지일 때 하단 여백(100px) 제거 및 배경색 통일 */
+.content-container.is-login-content {
+  padding-bottom: 0;
+  background-color: #80807f;
+  overflow: hidden;
+  /* 로그인 페이지에서 불필요한 스크롤 방지 */
+}

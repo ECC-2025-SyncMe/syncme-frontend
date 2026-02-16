@@ -22,8 +22,8 @@ function AppLayout() {
   const isLoginPage = location.pathname === '/' || location.pathname === '/login/callback';
 
   return (
-    <div className="app-container">
-      <div className="content-container">
+    <div className={`app-container ${isLoginPage ? 'is-login-page' : ''}`}>
+      <div className={`content-container ${isLoginPage ? 'is-login-content' : ''}`}>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login/callback" element={<LoginCallback />} />

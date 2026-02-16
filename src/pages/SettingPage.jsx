@@ -49,15 +49,15 @@ export default function SettingPage() {
   const handleChangeName = async () => {
     const newNickname = prompt('새 닉네임을 입력하세요:');
     if (!newNickname) return;
-      try {
-        await ChangeName({ nickname: newNickname });
-        alert('닉네임이 변경되었습니다.');
-        setUserData((prev) => ({ ...prev, nickname: newNickname }));
-      } catch (error) {
-        console.error('닉네임 변경 실패:', error);
-        alert('닉네임 변경에 실패했습니다.');
-      }
-    };
+    try {
+      await ChangeName({ nickname: newNickname });
+      alert('닉네임이 변경되었습니다.');
+      setUserData((prev) => ({ ...prev, nickname: newNickname }));
+    } catch (error) {
+      console.error('닉네임 변경 실패:', error);
+      alert('닉네임 변경에 실패했습니다.');
+    }
+  };
 
   // 2. 로그아웃
   const handleLogout = async () => {
@@ -135,7 +135,7 @@ export default function SettingPage() {
 
         <section className="menu">
           <button className="menu-item" onClick={handleChangeName}>
-            프로필 편집
+            닉네임 편집
           </button>
           <button className="menu-item" onClick={handleLogout}>
             로그아웃

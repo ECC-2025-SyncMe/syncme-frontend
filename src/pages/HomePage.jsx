@@ -30,7 +30,7 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     /**
-     * ✅ 점수 계산 로직 일관성 수정
+     * 점수 계산 로직 일관성 수정
      * 모든 스탯이 0이면 33점이 아닌 0점을 반환하도록 처리
      */
     const calculateTotalScore = (stats) => {
@@ -196,7 +196,7 @@ export default function Home() {
             />
             <DashboardGrid>
                 {/* 각 패널에 전달되는 stats와 score는 
-                    기록이 없을 때 모두 0으로 통일되어 전달됨 
+                    기록이 없을 때 모두 0으로 통일되어 전달 
                 */}
                 <LeftStatPanel stats={displayData.stats} />
                 <CenterModelPanel stats={displayData.stats} />
