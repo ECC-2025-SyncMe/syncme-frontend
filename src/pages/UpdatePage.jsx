@@ -56,7 +56,9 @@ export default function UpdatePage() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="update-container">Loading...</div>;
+  if (loading) {
+    return <div className="update-container">Loading...</div>;
+  }
 
   // 캐릭터 이미지 매핑
   const moodImg = { stress, burning, happy, neutral };
@@ -163,8 +165,8 @@ export default function UpdatePage() {
                 ></input>
               </div>
 
-              <button className="save-btn" onClick={updateApi.postTodayStatus}>
-                오늘 상태 저장하기
+              <button className="save-btn" onClick={() => updateApi.postTodayStatus(statusData)}>
+                <FaSync className={loading ? "spin" : ""} /> Sync
               </button>
 
               {/* 미리보기나 계산 버튼이 필요할 때 활용

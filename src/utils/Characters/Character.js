@@ -5,5 +5,5 @@ export const getCharacterMood = (stats) => {
   if (energy < 30 && pressure > 70) return 'stress';
   if (passion > 80 && energy > 50) return 'burning';
   if (energy > 70) return 'happy';
-  return 'neutral';
+  if (energy == 0 && pressure == 0 && passion == 0) return 'neutral';
 };

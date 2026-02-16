@@ -31,6 +31,20 @@ export default function SettingPage() {
     fetchUserData(); // 사용자 데이터 로드
   }, []);
 
+  // 이메일 정보
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await getUserInfo();
+        setUserData(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+
   if (loading) {
     return <div className="setting-page">Loading...</div>;
   }
