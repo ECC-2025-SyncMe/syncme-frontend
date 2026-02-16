@@ -37,7 +37,7 @@ export default function SettingPage() {
     const fetchUser = async () => {
       try{
         const res = await getUserInfo();
-        setUserData(res.data);
+        setUserData(res.data.data);
       } catch(error){
         console.error(error);
       }
@@ -104,9 +104,11 @@ export default function SettingPage() {
   // 5. About: 내 계정 정보 조회
   const handleGetUserInfo = async () => {
     try {
-      const response = await settingUserData();
+      const res = await settingUserData();
+      const user = res.data?.data ?? res.data;
+      
       alert(
-        `이메일: ${response.data.email}\n닉네임: ${response.data.nickname}`,
+        `이메일: ${user.data.data.email}\n닉네임: ${user.data.data.nickname}`,
       );
     } catch (error) {
       console.error('내 계정 정보 조회 실패:', error);
