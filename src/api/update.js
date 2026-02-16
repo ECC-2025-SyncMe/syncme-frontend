@@ -4,7 +4,7 @@ import axios from './axios';
 //export const fetchUserStats = async () => axios.get('/user/stats');
 
 export const getTodayStatus = async () => axios.get('/status/today'); // 오늘 상태 조회
-export const postTodayStatus = async () => axios.post('/status/today'); // 오늘 상태 업데이트(기록)
+export const postTodayStatus = async () => axios.post('/status/today'); // 오늘 상태 업데이트(기록) //버튼
 export const patchTodayStatus = async () => axios.patch('/status/today'); // 오늘 상태 수정
 
 export const characterStatus = async () => axios.get('/character/current'); // 현재 캐릭터 상태

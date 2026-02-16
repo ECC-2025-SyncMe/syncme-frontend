@@ -5,8 +5,6 @@ import { googleLogin } from '../api/login';
 import '../styles/LoginPage.css';
 import Logo from '../assets/Logo.png';
 
-import { googleLogin } from '../api/login';
-
 export default function LoginPage() {
   const navigate = useNavigate();
 

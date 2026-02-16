@@ -19,10 +19,11 @@ export default function UpdatePage() {
   const [userData, setUserData] = useState(null);
   const [statusData, setStatusData] = useState({
     energy: 0,
-    burden: 0,
+    pressure: 0,
     passion: 0,
   }); // getTodayStatus
   const [character, setCharacter] = useState({ summary: '', score: 0 }); // characterStatus, characterSummary
+  const [calculatedStatus, setCalculatedStatus] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // API 호출 로직
@@ -64,12 +65,28 @@ export default function UpdatePage() {
   const moodImg = { stress, burning, happy, neutral };
 
   // 2. 슬라이더 값 변경 핸들러
-  const handleSliderChange = (e) => {
+  const handleSliderChange = async (e) => {
     const { name, value } = e.target;
-    setStatusData((prev) => ({
-      ...prev,
-      [name]: parseInt(value), // 숫자로 변환하여 저장
-    }));
+    const updated = {
+      ...statusData,
+      [name]: parseInt(value),
+    };
+    setStatusData(updated);
+    await updateApi.patchTodayStatus(updated);
+  };
+
+  const handleSync = async () => {
+    try {
+      setLoading(true);
+      await updateApi.postTodayStatus(statusData);// 1. 상태 저장
+
+      const res = await updateApi.calculateStatus();// 2. 계산
+      setCalculatedStatus(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,13 +106,15 @@ export default function UpdatePage() {
         </div>
 
         <div className="panel">
-
           <h3 className="section-title">
             {new Date().toLocaleDateString()}
             <br />
-            오늘의 상태 <span>Status</span>
+            {/*오늘의 상태 <span>Status</span>*/}
+            {calculatedStatus && (
+              <p className="char-summary">{calculatedStatus.summary}</p>
+            )}
+            
           </h3>
-          {/* <p className="char-summary">"{character.summary}"</p> */}
 
           <div className="stats-container">
             <div className="stat-item energy">
@@ -166,7 +185,7 @@ export default function UpdatePage() {
                 ></input>
               </div>
 
-              <button className="save-btn" onClick={() => updateApi.postTodayStatus(statusData)}>
+              <button className="save-btn" onClick={handleSync}>
                 <FaSync className={loading ? "spin" : ""} /> Sync
               </button>
 
