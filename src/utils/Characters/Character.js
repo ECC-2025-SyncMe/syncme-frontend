@@ -1,12 +1,19 @@
-import { characterSummary } from "../../api/update";
-
 export const getCharacterMood = (stats) => {
-  // stats 매개변수를 통해 외부에서 데이터를 전달받습니다.
-  const { energy, pressure, passion } = stats;
-  const avg = (energy + pressure + passion) / 3
+  // 안전 장치: stats가 없을 경우 기본 객체 사용
+  const safeStats = stats || { energy: 0, burden: 0, passion: 0 };
 
-  if (avg >= 90) return 'burning' && characterSummary == "You are on fire, but close to burnout."
-  if (avg >= 70) return 'stress' && characterSummary == "Stress level is rising.";
-  if (avg >= 45) return 'neutral' && characterSummary == "Maintaining balance.";
-  if (avg >= 0) return 'happy' && characterSummary == "In a good mood today.";
+  // 데이터 키 이름이 energy, burden, passion인지 pressure인지 확인 필요
+  const { energy, burden, pressure, passion } = safeStats;
+
+  // burden이 없으면 pressure 사용
+  const actualBurden = burden || pressure || 0;
+
+  const avg = (energy + actualBurden + passion) / 3;
+
+  if (avg >= 90) return 'burning';
+  if (avg >= 70) return 'stress';
+  if (avg >= 45) return 'neutral';
+
+  // 기본값
+  return 'happy';
 };

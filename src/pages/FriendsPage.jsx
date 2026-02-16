@@ -207,7 +207,13 @@ export default function Friends() {
         }
     };
 
-    if (loading || !myProfile) return <div>로딩 중...</div>;
+    if (loading || !myProfile) {
+        return (
+            <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', background: '#000' }}>
+                로딩 중입니다...
+            </div>
+        );
+    }
 
     return (
         <Container>
@@ -243,4 +249,5 @@ export default function Friends() {
             </Column>
         </Container>
     );
+
 }
