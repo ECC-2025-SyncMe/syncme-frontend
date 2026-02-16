@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// 환경변수에서 API 주소 가져오기
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Backend API URL
+const BASE_URL = 'https://lrcc5bl2sj.execute-api.ap-northeast-2.amazonaws.com/default';
 
 const api = axios.create({
   baseURL: BASE_URL,
