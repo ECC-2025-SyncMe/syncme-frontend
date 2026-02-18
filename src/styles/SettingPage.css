@@ -1,76 +1,159 @@
+/* App.css의 .content-container 내부에서 꽉 차게 동작 */
 .setting-page {
   width: 100%;
+  /* 부모(.content-container)의 높이(padding 제외 영역)를 꽉 채움 */
   height: 100%;
   background-color: #000000;
   color: #fff;
+
+  /* 정중앙 정렬을 위한 Flex 설정 */
+  display: flex;
+  justify-content: center;
+  /* 수직 중앙 (상하) */
+  align-items: center;
+  /* 수평 중앙 (좌우) */
+
+  /* 내부 스크롤 방지 */
+  overflow: hidden;
+}
+
+.setting-main {
+  width: 100%;
+  max-width: 420px;
+  /* 모바일/앱 느낌을 위해 너비 제한 */
+  padding: 0 2rem;
+  /* 좌우 여백만 줌 */
+
   display: flex;
   flex-direction: column;
-}
-.setting-main {
-  flex: 1;
-  padding-top: 3%;
-  padding-left: 25%;
-
-  flex-direction: column;
-  justify-content: flex-start;
+  /* 요소들 사이의 간격을 균일하게 배치 */
+  gap: 1.5rem;
 }
 
-/* profile */
+/* --- 프로필 영역 --- */
 .profile {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.2rem;
+  /* 프로필 아래 간격을 조금 더 줌 */
+  margin-bottom: 0.5rem;
 }
+
+.profile-img-wrapper {
+  /* 이미지 영역 크기 고정 */
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+  /* 찌그러짐 방지 */
+}
+
 .user-img {
-  width: 5rem;
+  width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-
-  border: 0.25rem solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 2px solid #fff;
+  background-color: #333;
 }
 
 .profile-email {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 500;
+  word-break: break-all;
+  /* 이메일이 길 경우 줄바꿈 */
 }
 
-/* menu */
+/* --- 메뉴 공통 스타일 --- */
 .menu {
-  margin-top: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
+  /* 메뉴 아이템 간 간격 */
 }
+
 .menu-item {
   background: none;
   border: none;
   color: inherit;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+  transition: opacity 0.2s;
 }
 
+.menu-item:hover {
+  opacity: 0.7;
+}
+
+.menu-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.menu-text {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  /* 텍스트가 길면 줄바꿈 허용 */
+}
+
+.sub-text {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+.danger {
+  /* 계정 삭제 등 위험 요소에 대한 스타일 (옵션) */
+  color: #fff;
+  /* 살짝 붉은 톤 */
+}
+
+/* 구분선 */
 .divider {
-  margin: 2rem 0;
+  margin: 0.5rem 0;
+  /* 위아래 간격 최소화 */
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.8);
-  max-width: 32rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  /* 너무 두껍지 않게 조정 */
+  width: 100%;
 }
 
-.footer-menu {
+/* --- 하단 정보 및 링크 --- */
+.footer-info {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.footer-links {
   display: flex;
   gap: 1.5rem;
-  font-size: 1.1rem;
-  opacity: 0.9;
+  font-size: 0.95rem;
+  color: #ccc;
+  font-weight: 500;
 }
-.footer-menu button {
-  background: none;
-  border: none;
-  color: inherit;
+
+.social-icons {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.social-icon {
+  font-size: 1.6rem;
   cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.social-icon:hover {
+  transform: scale(1.1);
+  color: #fff;
 }

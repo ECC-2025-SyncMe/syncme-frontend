@@ -3,6 +3,11 @@ import { useState, useEffect } from 'react';
 import '../styles/SettingPage.css';
 import User from '../assets/User.png';
 
+import { FiEdit2, FiLogOut, FiTrash2 } from "react-icons/fi";
+import { RiRestartLine } from "react-icons/ri";
+import { FaGithub, FaFigma } from "react-icons/fa";
+import { SiNotion } from "react-icons/si";
+
 import {
   settingUserData,
   settingDeleteData,
@@ -37,10 +42,10 @@ export default function SettingPage() {
   // 이메일 정보
   useEffect(() => {
     const fetchUser = async () => {
-      try{
+      try {
         const res = await getUserInfo();
         setUserData(res.data.data);
-      } catch(error){
+      } catch (error) {
         console.error(error);
       }
     };
@@ -104,7 +109,7 @@ export default function SettingPage() {
     try {
       const res = await settingUserData();
       const user = res.data?.data ?? res.data;
-      
+
       alert(
         `이메일: ${user.email}\n닉네임: ${user.nickname}`,
       );
@@ -125,45 +130,71 @@ export default function SettingPage() {
     }
   };
 
+  // 링크 이동 함수 (새 탭으로 열기)
+  const openLink = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   if (loading) return <div className="setting-page">Loading...</div>;
 
   return (
     <div className="setting-page">
       <main className="setting-main">
+        {/* 상단 프로필 영역 */}
         <section className="profile">
-          <div className="profile-img">
-            <img src={User} className="user-img"></img>
+          <div className="profile-img-wrapper">
+            <img src={User} className="user-img" alt="profile" />
           </div>
           <span className="profile-email">
-            {userData?.email || '이메일 정보 없음'}
+            {userData?.email || 'wpdls@gmail.com'}
           </span>
         </section>
 
+        {/* 메뉴 그룹 1 */}
         <section className="menu">
           <button className="menu-item" onClick={handleChangeName}>
-            닉네임 편집
+            <FiEdit2 className="menu-icon" />
+            <span className="menu-text">
+              {userData?.nickname || 'JANE'}
+            </span>
           </button>
+
           <button className="menu-item" onClick={handleLogout}>
-            로그아웃
+            <FiLogOut className="menu-icon" />
+            <span>로그아웃</span>
           </button>
         </section>
 
         <hr className="divider" />
 
+        {/* 메뉴 그룹 2 */}
         <section className="menu">
-          <button className="menu-item" onClick={() => handleResetData()}>
-            데이터 초기화
+          {/* 아이콘 변경됨 */}
+          <button className="menu-item" onClick={handleResetData}>
+            <RiRestartLine className="menu-icon" />
+            <span>데이터 초기화</span>
           </button>
-          <button className="menu-item" onClick={handleDelete}>
-            계정 삭제
+
+          <button className="menu-item danger" onClick={handleDelete}>
+            <FiTrash2 className="menu-icon" />
+            <span>계정 삭제</span>
           </button>
         </section>
 
         <hr className="divider" />
 
-        <section className="footer-menu">
-          <button onClick={handleGetUserInfo}>About</button>
-          <button onClick={handleGetSettings}>Services</button>
+        {/* 하단 정보 및 링크 */}
+        <section className="footer-info">
+          <div className="footer-links">
+            <span>About</span>
+            <span>Services</span>
+          </div>
+
+          <div className="social-icons">
+            <FaGithub className="social-icon" onClick={() => openLink('https://github.com/')} />
+            <FaFigma className="social-icon" onClick={() => openLink('https://www.figma.com/')} />
+            <SiNotion className="social-icon" onClick={() => openLink('https://www.notion.so/')} />
+          </div>
         </section>
       </main>
     </div>
