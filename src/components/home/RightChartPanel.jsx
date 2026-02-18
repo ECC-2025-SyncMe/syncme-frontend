@@ -76,7 +76,7 @@ export default function RightChartPanel({ historyData, score }) {
                 <ScoreContainer>
                     <div className="bar-wrapper">
                         <div className="bar-box">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={220}>
                                 <BarChart data={barData} margin={{ top: 0, bottom: 0 }}>
                                     <YAxis hide domain={[0, 100]} />
                                     <Bar
