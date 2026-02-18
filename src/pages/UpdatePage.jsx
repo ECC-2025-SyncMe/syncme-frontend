@@ -158,23 +158,23 @@ export default function UpdatePage() {
               </div>
             </div>
 
-            <div className="stat-item burden">
+            <div className="stat-item pressure">
               <div className="label-row">
                 <FaWeightHanging className="icon" />
                 <span className="name">PRESSURE</span>
-                <span className="value">{statusData.burden}%</span>
+                <span className="value">{statusData.pressure}%</span>
               </div>
               <div className="bar-bg">
                 <div
                   className="bar-fill"
-                  style={{ width: `${statusData.burden}%` }}
+                  style={{ width: `${statusData.pressure}%` }}
                 ></div>
                 <input
                   type="range"
                   name="pressure"
                   min="0"
                   max="100"
-                  value={statusData.burden}
+                  value={statusData.pressure}
                   onChange={handleSliderChange}
                   className="real-slider"
                 ></input>
