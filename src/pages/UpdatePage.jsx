@@ -20,7 +20,7 @@ export default function UpdatePage() {
   const [userData, setUserData] = useState(null);
   const [statusData, setStatusData] = useState({
     energy: 0,
-    pressure: 0,
+    burden: 0,
     passion: 0,
   }); // getTodayStatus
   const [character, setCharacter] = useState({ summary: '', score: 0 }); // characterStatus, characterSummary
@@ -55,8 +55,10 @@ export default function UpdatePage() {
             updateApi.characterScore(),
           ]);
 
-        setUserData(userRes.data);
-        setStatusData(statusRes.data || { energy: 0, pressure: 0, passion: 0 });
+        const user = userRes.data?.data ?? userRes.data;
+        setUserData(user);
+
+        setStatusData(statusRes.data || { energy: 0, burden: 0, passion: 0 });
         // 캐릭터 상태와 요약 문장을 합쳐서 저장
         setCharacter({
           ...charRes.data,
