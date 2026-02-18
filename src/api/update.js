@@ -11,5 +11,6 @@ export const characterStatus = async () => axios.get('/character/current'); // �
 export const characterScore = async () => axios.get('/character/score'); // 캐릭터 점수 조회
 export const characterSummary = async () => axios.get('/character/summary'); // 캐릭터 요약 문장
 
-export const calculateStatus = async () => axios.get('/calculate/status'); // 상태 입력 후 계산 결과 반환
+export const calculateStatus = (data) => axios.post('/calculate/status', data); // 상태 입력 후 계산 결과 반환
+
 export const calculatePreview = async () => axios.get('/calculate/preview'); // 결괏값 기반 미리보기
