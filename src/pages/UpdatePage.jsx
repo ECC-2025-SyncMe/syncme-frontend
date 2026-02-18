@@ -41,7 +41,6 @@ export default function UpdatePage() {
     }
   };
 
-
   // API 호출 로직
   useEffect(() => {
     const fetchData = async () => {
@@ -159,10 +158,10 @@ export default function UpdatePage() {
               </div>
             </div>
 
-            <div className="stat-item pressure">
+            <div className="stat-item burden">
               <div className="label-row">
                 <FaWeightHanging className="icon" />
-                <span className="name">pressure</span>
+                <span className="name">PRESSURE</span>
                 <span className="value">{statusData.burden}%</span>
               </div>
               <div className="bar-bg">
@@ -172,7 +171,7 @@ export default function UpdatePage() {
                 ></div>
                 <input
                   type="range"
-                  name="burden"
+                  name="pressure"
                   min="0"
                   max="100"
                   value={statusData.burden}

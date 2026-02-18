@@ -39,7 +39,6 @@
   font-size: 1rem;
   flex: 1;
   letter-spacing: 0.5px;
-  pointer-events: none;
 }
 
 .stat-item .value {
@@ -76,7 +75,7 @@
 }
 
 .real-slider {
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
