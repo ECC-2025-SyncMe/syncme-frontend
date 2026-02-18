@@ -18,7 +18,7 @@ export default function FriendList({
             <SearchBar>
                 <FaSearch style={{ marginRight: '10px', color: theme.colors.secondary }} />
                 <input
-                    placeholder="친구 닉네임 검색..."
+                    placeholder="친구 검색..."
                     value={keyword}
                     onChange={e => setKeyword(e.target.value)}
                 />
