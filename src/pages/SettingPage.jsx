@@ -191,8 +191,8 @@ export default function SettingPage() {
           </div>
 
           <div className="social-icons">
-            <FaGithub className="social-icon" onClick={() => openLink('https://github.com/')} />
-            <FaFigma className="social-icon" onClick={() => openLink('https://www.figma.com/')} />
+            <FaGithub className="social-icon" onClick={() => openLink('https://github.com/ECC-2025-SyncMe')} />
+            <FaFigma className="social-icon" onClick={() => openLink('https://www.figma.com/proto/xHbZbifU7sbM86sqsyEbMd/ECC_SyncMe?node-id=5-2&starting-point-node-id=5%3A2&t=O2LkKS7CHS9YHpJV-1')} />
             <SiNotion className="social-icon" onClick={() => openLink('https://www.notion.so/1-2e46ce44b4038033b4fafe45f0d3594d')} />
           </div>
         </section>
