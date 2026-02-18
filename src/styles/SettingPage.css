@@ -20,7 +20,6 @@
   padding: 0 2rem;
   display: flex;
   flex-direction: column;
-  /* 요소들 사이의 간격을 균일하게 배치 */
   gap: 1.5rem;
 }
 
