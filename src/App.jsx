@@ -72,7 +72,7 @@ function AppLayout() {
 }
 
 export default function App() {
-  const googleClientId = '272193164209-rngsfkf55b51i8bigu2cr727l74nih63.apps.googleusercontent.com';
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
