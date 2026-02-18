@@ -5,11 +5,15 @@ export const SearchBar = styled.div`
   display: flex; align-items: center; 
   background: #252525; padding: 12px; border-radius: 12px; 
   margin-bottom: 20px; border: 1px solid ${theme.colors.border}; 
+  /* 검색창 크기 고정 (줄어들지 않음) */
+  flex-shrink: 0;
   input { border: none; background: transparent; outline: none; color: white; width: 100%; }
 `;
 
 export const TabContainer = styled.div`
   display: flex; border-bottom: 1px solid ${theme.colors.border}; margin-bottom: 15px;
+  /* 탭 영역 크기 고정 */
+  flex-shrink: 0;
 `;
 
 export const TabButton = styled.button`
@@ -21,7 +25,19 @@ export const TabButton = styled.button`
 `;
 
 export const List = styled.div` 
-  flex: 1; overflow-y: auto; width: 100%; 
+  flex: 1; 
+  overflow-y: auto; 
+  width: 100%; 
+  min-height: 0;
+  scrollbar-gutter: stable;
+
+  /* 스크롤바 디자인 */
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
 `;
 
 export const Item = styled.div`

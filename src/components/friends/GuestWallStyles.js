@@ -2,9 +2,22 @@ import styled from '@emotion/styled';
 import { theme } from '../../styles/theme';
 
 export const WallList = styled.div`
-  flex: 1; overflow-y: auto; background: #111; 
+  flex: 1; 
+  overflow-y: auto; 
+  width: 100%; 
+  min-height: 0;
+  scrollbar-gutter: stable;
+
+  background: #111; 
   padding: 15px; border-radius: 15px; 
   border: 1px solid #222; margin-bottom: 10px;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
 `;
 
 export const CommentBubble = styled.div`
@@ -15,6 +28,8 @@ export const CommentBubble = styled.div`
 
 export const InputArea = styled.div`
   width: 100%; display: flex; gap: 10px; 
+  /* 입력창 영역 크기 고정 */
+  flex-shrink: 0;
   input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #252525; color: white; } 
   button { background: ${theme.colors.primary}; color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 `;

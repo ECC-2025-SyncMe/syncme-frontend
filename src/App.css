@@ -12,46 +12,46 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* 전체 스크롤 방지 */
+  /* 전체 화면 스크롤 절대 방지 */
   position: relative;
 }
 
 .content-container {
   flex: 1;
   width: 100%;
+
   overflow-y: auto;
-  /* 이 영역 안에서만 스크롤 발생 */
+  overflow-x: hidden;
+
   position: relative;
-  /* 내비바가 아래에 있으므로 내용이 가려지지 않게 하단 여백 추가 */
+
+  /* 내비바 공간 확보 */
   padding-bottom: 100px;
+
+  /* 스크롤바가 생길 때 레이아웃이 밀리지 않도록 공간 예약 */
+  scrollbar-gutter: stable;
 }
 
-.content-container {
-  flex: 1;
-  width: 100%;
-  overflow-y: auto;
-  position: relative;
+/* 로그인 페이지 예외 처리 */
+.content-container.is-login-content {
+  padding-bottom: 0;
+  background-color: #80807f;
+  overflow: hidden;
 }
 
 .nav-bar {
   flex-shrink: 0;
   position: absolute;
-  /* 하단 고정을 위해 절대 위치 지정 */
   bottom: 20px;
-  /* 바닥에서 20px 띄움 */
   left: 50%;
   transform: translateX(-50%);
-  /* 중앙 정렬 */
-
   width: 95%;
   max-width: 600px;
   height: 70px;
   padding: 0 10px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background-color: #1a1a1a;
   border: 1px solid #333;
   border-radius: 40px;
@@ -61,12 +61,4 @@
 
 .app-container.is-login-page {
   background-color: #80807f;
-}
-
-/* 로그인 페이지일 때 하단 여백(100px) 제거 및 배경색 통일 */
-.content-container.is-login-content {
-  padding-bottom: 0;
-  background-color: #80807f;
-  overflow: hidden;
-  /* 로그인 페이지에서 불필요한 스크롤 방지 */
 }
