@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import api from '../api/axios';
 import { toDateStr } from '../utils/dateUtils';
 import { useCalendar } from '../hooks/useCalendar';
@@ -11,11 +11,9 @@ import LeftStatPanel from '../components/home/LeftStatPanel';
 import CenterModelPanel from '../components/home/CenterModelPanel';
 import RightChartPanel from '../components/home/RightChartPanel';
 
-// 캐릭터 로직 추가
-import { getCharacterMood } from '../utils/Characters/Character.js';
-
 export default function Home() {
     const { userId } = useParams();
+    const location = useLocation(); // 현재 위치 정보 가져오기(페이지 이동 감지용)
     const isMe = !userId;
 
     const [myInfo, setMyInfo] = useState(null);
@@ -30,8 +28,7 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     /**
-     * 점수 계산 로직 일관성 수정
-     * 모든 스탯이 0이면 33점이 아닌 0점을 반환하도록 처리
+     * 점수 계산 로직
      */
     const calculateTotalScore = (stats) => {
         if (!stats || (stats.energy === 0 && stats.burden === 0 && stats.passion === 0)) {
@@ -41,12 +38,14 @@ export default function Home() {
         return Math.round((energy + passion + (100 - burden)) / 3);
     };
 
+    // 날짜 클릭 시 대시보드 업데이트 로직
     const updateDashboard = async (targetDate) => {
         if (!isMe) return;
 
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
+        // 오늘 날짜를 클릭했다면 서버에서 최신 상태를 다시 가져옴
         if (targetStr === todayStr) {
             try {
                 const res = await api.get('/status/today');
@@ -54,7 +53,7 @@ export default function Home() {
                     const data = res.data.data;
                     const stats = {
                         energy: data.energy || 0,
-                        burden: data.burden || 0,
+                        burden: data.burden || data.pressure || 0, // 필드명 호환
                         passion: data.passion || 0
                     };
                     setDisplayData({
@@ -80,31 +79,34 @@ export default function Home() {
                 stats: stats
             });
         } else {
-            // 기록이 없는 날짜 클릭 시 명확하게 0점 처리
+            // 기록이 없는 날짜
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
 
     const calendar = useCalendar(updateDashboard);
 
+    // useEffect 수정: location.key를 추가하여 페이지 진입 시마다 실행
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
             try {
                 if (isMe) {
+                    // 내 정보 가져오기
                     const userRes = await api.get('/users/me');
                     setMyInfo(userRes.data.data);
 
                     let todayStats = { energy: 0, burden: 0, passion: 0 };
                     let todayScore = 0;
 
+                    // 오늘 상태 가져오기
                     try {
                         const statusRes = await api.get('/status/today');
                         if (statusRes.data.success && statusRes.data.data) {
                             const todayData = statusRes.data.data;
                             todayStats = {
                                 energy: todayData.energy || 0,
-                                burden: todayData.burden || 0,
+                                burden: todayData.burden || todayData.pressure || 0,
                                 passion: todayData.passion || 0
                             };
                             todayScore = todayData.totalScore || calculateTotalScore(todayStats);
@@ -116,11 +118,13 @@ export default function Home() {
                         }
                     } catch (e) { console.log("오늘 기록 없음"); }
 
+                    // 히스토리 로드
                     try {
                         const historyRes = await api.get('/status/history');
                         let items = historyRes.data.data.items || [];
                         const todayStr = toDateStr(new Date());
 
+                        // 오늘 기록이 히스토리에 아직 안 들어갔다면 수동으로 추가(그래프용)
                         const hasToday = items.some(item => item.date === todayStr);
                         if (!hasToday && todayScore > 0) {
                             items.push({ date: todayStr, ...todayStats });
@@ -129,7 +133,7 @@ export default function Home() {
                         items.sort((a, b) => new Date(a.date) - new Date(b.date));
                         setAllHistory(items);
 
-                        const chartData = items.slice(-4).map(item => ({
+                        const chartData = items.slice(-7).map(item => ({
                             date: item.date,
                             shortDate: item.date.substring(5),
                             score: calculateTotalScore(item)
@@ -148,7 +152,7 @@ export default function Home() {
                             const status = resData.status || null;
                             const stats = {
                                 energy: status?.energy || 0,
-                                burden: status?.burden || 0,
+                                burden: status?.burden || status?.pressure || 0,
                                 passion: status?.passion || 0
                             };
 
@@ -180,7 +184,7 @@ export default function Home() {
         };
 
         fetchInitialData();
-    }, [userId, isMe]);
+    }, [userId, isMe, location.key]); // location.key가 바뀌면(페이지 이동 시) 무조건 재실행
 
     if (loading) return <div style={{ color: '#fff', padding: '20px' }}>로딩 중...</div>;
     if (!myInfo) return <div style={{ color: '#fff', padding: '20px' }}>유저 정보를 찾을 수 없습니다.</div>;
@@ -195,9 +199,6 @@ export default function Home() {
                 recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>
-                {/* 각 패널에 전달되는 stats와 score는 
-                    기록이 없을 때 모두 0으로 통일되어 전달 
-                */}
                 <LeftStatPanel stats={displayData.stats} />
                 <CenterModelPanel stats={displayData.stats} />
                 <RightChartPanel historyData={historyData} score={displayData.score} />
