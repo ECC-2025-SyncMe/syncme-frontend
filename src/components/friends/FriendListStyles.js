@@ -26,10 +26,10 @@ export const TabButton = styled.button`
 
 export const List = styled.div` 
   flex: 1; 
-  overflow-y: auto; 
   width: 100%; 
-  min-height: 0;
-  scrollbar-gutter: stable;
+  overflow-y: auto; /* 오직 여기서만 스크롤! */
+  min-height: 0; 
+  scrollbar-gutter: stable; /* 스크롤바 공간 예약 */
 
   /* 스크롤바 디자인 */
   &::-webkit-scrollbar { width: 6px; }

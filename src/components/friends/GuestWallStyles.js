@@ -3,8 +3,7 @@ import { theme } from '../../styles/theme';
 
 export const WallList = styled.div`
   flex: 1; 
-  overflow-y: auto; 
-  width: 100%; 
+  overflow-y: auto; /* 오직 여기서만 스크롤! */
   min-height: 0;
   scrollbar-gutter: stable;
 

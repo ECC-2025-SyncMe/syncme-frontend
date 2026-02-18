@@ -5,20 +5,22 @@ import { theme } from '../styles/theme';
 export const Container = styled.div`
   display: flex;
   width: 100%;
-  height: calc(100vh - 140px); 
+  height: 100%; /* 부모 영역 꽉 채우기 */
   
-  /* 여백은 유지 */
-  padding: 0 20px; 
+  /* [핵심] 자연스러운 간격 조정 */
+  /* 상단: 50px (너무 붙지 않게) */
+  /* 하단: 100px (내비바 가려지지 않게 공간 확보) */
+  /* 좌우: 20px */
+  padding: 50px 20px 100px 20px; 
+  
   gap: 20px;
   box-sizing: border-box;
   background-color: ${theme.colors.background}; 
   color: ${theme.colors.text};
   
-  /* 부모 스크롤바 유발 방지 */
-  overflow: hidden; 
+  overflow: hidden; /* 여기도 스크롤 금지 */
 `;
 
-// 3단 컬럼 (내부 스크롤 담당)
 export const Column = styled.div`
   background: ${theme.colors.panel}; 
   border-radius: 20px; 
@@ -32,8 +34,9 @@ export const Column = styled.div`
   min-height: 0; 
   
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: hidden; /* 자식에게 스크롤 위임 */
 
+  /* Flex 비율 */
   &.left { flex: 1; align-items: flex-start; }
   &.center { flex: 1.2; }
   &.right { flex: 1; }
