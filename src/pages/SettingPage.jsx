@@ -21,8 +21,9 @@ export default function SettingPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await settingUserData();
-        setUserData(response.data);
+        const res = await settingUserData();
+        const user = res.data?.data ?? res.data;
+        setUserData(user);
       } catch (error) {
         console.error('Failed to fetch user data:', error);
       } finally {
@@ -32,9 +33,6 @@ export default function SettingPage() {
     fetchUserData(); // 사용자 데이터 로드
   }, []);
 
-  if (loading) {
-    return <div className="setting-page">Loading...</div>;
-  }
 
   // 이메일 정보
   useEffect(() => {
@@ -108,7 +106,7 @@ export default function SettingPage() {
       const user = res.data?.data ?? res.data;
       
       alert(
-        `이메일: ${user.data.data.email}\n닉네임: ${user.data.data.nickname}`,
+        `이메일: ${user.email}\n닉네임: ${user.nickname}`,
       );
     } catch (error) {
       console.error('내 계정 정보 조회 실패:', error);
@@ -126,6 +124,8 @@ export default function SettingPage() {
       alert('설정 정보를 불러올 수 없습니다.');
     }
   };
+
+  if (loading) return <div className="setting-page">Loading...</div>;
 
   return (
     <div className="setting-page">
