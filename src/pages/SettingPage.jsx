@@ -91,7 +91,7 @@ export default function SettingPage() {
       try {
         await DeleteAccount();
         alert('계정이 삭제되었습니다.');
-        window.location.href = '/login';
+        window.location.href = '/';
       } catch (error) {
         console.error('계정 삭제 실패:', error);
         alert('요청을 처리할 수 없습니다.');
