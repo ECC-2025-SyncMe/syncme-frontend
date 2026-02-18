@@ -9,11 +9,11 @@ export const getCharacterMood = (stats) => {
   const passion = stats.passion || 0;
 
   // 특수 상태 우선 체크
-  if (energy < 30 && pressure > 70) return 'stress';
+  if (energy < 30 && (burden || pressure) > 70) return 'stress';
   if (passion > 80 && energy > 50) return 'burning';
 
   // 평균 및 주요 수치 체크
-  const avg = (energy + passion + (100 - pressure)) / 3;
+  const avg = (energy + passion + (100 - (burden || pressure))) / 3;
 
   if (avg > 70 || energy > 80) return 'happy';
 
