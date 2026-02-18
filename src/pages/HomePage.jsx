@@ -13,7 +13,7 @@ import RightChartPanel from '../components/home/RightChartPanel';
 
 export default function Home() {
     const { userId } = useParams();
-    const location = useLocation(); // 현재 위치 정보 가져오기(페이지 이동 감지용)
+    const location = useLocation();
     const isMe = !userId;
 
     const [myInfo, setMyInfo] = useState(null);
@@ -24,6 +24,8 @@ export default function Home() {
 
     const [allHistory, setAllHistory] = useState([]);
     const [historyData, setHistoryData] = useState([]);
+
+    // 기본값 설정 (데이터가 없거나 로딩 전)
     const [randomComment, setRandomComment] = useState({ writer: "SyncMe", text: "오늘 하루도 힘내세요!" });
     const [loading, setLoading] = useState(true);
 
@@ -38,6 +40,21 @@ export default function Home() {
         return Math.round((energy + passion + (100 - burden)) / 3);
     };
 
+    /**
+     * 댓글 목록에서 랜덤으로 하나 뽑는 함수
+     */
+    const pickRandomComment = (comments) => {
+        if (!comments || comments.length === 0) return;
+
+        const randomIndex = Math.floor(Math.random() * comments.length);
+        const picked = comments[randomIndex];
+
+        setRandomComment({
+            writer: picked.authorNickname || picked.writer || '익명',
+            text: picked.content || picked.text || '내용 없음'
+        });
+    };
+
     // 날짜 클릭 시 대시보드 업데이트 로직
     const updateDashboard = async (targetDate) => {
         if (!isMe) return;
@@ -45,7 +62,6 @@ export default function Home() {
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        // 오늘 날짜를 클릭했다면 서버에서 최신 상태를 다시 가져옴
         if (targetStr === todayStr) {
             try {
                 const res = await api.get('/status/today');
@@ -53,7 +69,7 @@ export default function Home() {
                     const data = res.data.data;
                     const stats = {
                         energy: data.energy || 0,
-                        burden: data.burden || data.pressure || 0, // 필드명 호환
+                        burden: data.burden || data.pressure || 0,
                         passion: data.passion || 0
                     };
                     setDisplayData({
@@ -79,52 +95,50 @@ export default function Home() {
                 stats: stats
             });
         } else {
-            // 기록이 없는 날짜
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
 
     const calendar = useCalendar(updateDashboard);
 
-    // useEffect 수정: location.key를 추가하여 페이지 진입 시마다 실행
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
             try {
                 if (isMe) {
-                    // 내 정보 가져오기
-                    const userRes = await api.get('/users/me');
-                    setMyInfo(userRes.data.data);
+                    const [userRes, statusRes, historyRes, commentsRes] = await Promise.allSettled([
+                        api.get('/users/me'),
+                        api.get('/status/today'),
+                        api.get('/status/history'),
+                        api.get('/comments/received')
+                    ]);
 
+                    // 유저 정보 처리
+                    if (userRes.status === 'fulfilled' && userRes.value.data.success) {
+                        setMyInfo(userRes.value.data.data);
+                    }
+
+                    // 오늘 상태 처리
                     let todayStats = { energy: 0, burden: 0, passion: 0 };
                     let todayScore = 0;
 
-                    // 오늘 상태 가져오기
-                    try {
-                        const statusRes = await api.get('/status/today');
-                        if (statusRes.data.success && statusRes.data.data) {
-                            const todayData = statusRes.data.data;
-                            todayStats = {
-                                energy: todayData.energy || 0,
-                                burden: todayData.burden || todayData.pressure || 0,
-                                passion: todayData.passion || 0
-                            };
-                            todayScore = todayData.totalScore || calculateTotalScore(todayStats);
+                    if (statusRes.status === 'fulfilled' && statusRes.value.data.success && statusRes.value.data.data) {
+                        const todayData = statusRes.value.data.data;
+                        todayStats = {
+                            energy: todayData.energy || 0,
+                            burden: todayData.burden || todayData.pressure || 0,
+                            passion: todayData.passion || 0
+                        };
+                        todayScore = todayData.totalScore || calculateTotalScore(todayStats);
 
-                            setDisplayData({
-                                score: todayScore,
-                                stats: todayStats
-                            });
-                        }
-                    } catch (e) { console.log("오늘 기록 없음"); }
+                        setDisplayData({ score: todayScore, stats: todayStats });
+                    }
 
-                    // 히스토리 로드
-                    try {
-                        const historyRes = await api.get('/status/history');
-                        let items = historyRes.data.data.items || [];
+                    // 히스토리 처리
+                    if (historyRes.status === 'fulfilled' && historyRes.value.data.success) {
+                        let items = historyRes.value.data.data.items || [];
                         const todayStr = toDateStr(new Date());
 
-                        // 오늘 기록이 히스토리에 아직 안 들어갔다면 수동으로 추가(그래프용)
                         const hasToday = items.some(item => item.date === todayStr);
                         if (!hasToday && todayScore > 0) {
                             items.push({ date: todayStr, ...todayStats });
@@ -139,14 +153,23 @@ export default function Home() {
                             score: calculateTotalScore(item)
                         }));
                         setHistoryData(chartData);
-                    } catch (e) { console.error("히스토리 로드 실패", e); }
+                    }
+
+                    // 방명록(한 줄 응원) 처리
+                    if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
+                        pickRandomComment(commentsRes.value.data.data);
+                    }
 
                 } else {
-                    // --- 친구 홈 정보 ---
-                    try {
-                        const friendRes = await api.get(`/home/${userId}`);
-                        const resData = friendRes.data.data;
+                    // --- 친구 홈 방문 시 ---
+                    // 친구 정보/홈데이터 + 친구 방명록 동시에 가져오기
+                    const [friendRes, commentsRes] = await Promise.allSettled([
+                        api.get(`/home/${userId}`),
+                        api.get(`/friends/${userId}/comments`) // 친구 방명록 가져오기
+                    ]);
 
+                    if (friendRes.status === 'fulfilled' && friendRes.value.data.success) {
+                        const resData = friendRes.value.data.data;
                         if (resData) {
                             setMyInfo(resData.user || resData);
                             const status = resData.status || null;
@@ -172,8 +195,11 @@ export default function Home() {
                             }));
                             setHistoryData(chartData);
                         }
-                    } catch (error) {
-                        console.error("친구 데이터 로드 실패:", error);
+                    }
+
+                    // 친구 방명록 랜덤 표시
+                    if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
+                        pickRandomComment(commentsRes.value.data.data);
                     }
                 }
             } catch (error) {
@@ -184,7 +210,7 @@ export default function Home() {
         };
 
         fetchInitialData();
-    }, [userId, isMe, location.key]); // location.key가 바뀌면(페이지 이동 시) 무조건 재실행
+    }, [userId, isMe, location.key]);
 
     if (loading) return <div style={{ color: '#fff', padding: '20px' }}>로딩 중...</div>;
     if (!myInfo) return <div style={{ color: '#fff', padding: '20px' }}>유저 정보를 찾을 수 없습니다.</div>;

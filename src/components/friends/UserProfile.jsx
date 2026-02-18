@@ -18,30 +18,24 @@ export default function UserProfile({ myInfo, isMe, showBack, onResetTarget }) {
     const [summary, setSummary] = useState('');
 
     useEffect(() => {
-        const fetchDisplayMessage = async () => {
+        const fetchSummary = async () => {
             try {
+                // 이제 여기서 isMe는 항상 true이므로 내 요약 정보를 잘 가져옵니다.
                 if (isMe) {
-                    const res = await api.get('/comments/received');
-
-                    if (res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
-                        const lastComment = res.data.data[res.data.data.length - 1];
-                        setSummary(lastComment.content || lastComment.text);
-                    } else {
-                        // 댓글이 없으면 기본 멘트
-                        setSummary("아직 받은 응원이 없어요. 친구를 초대해보세요!");
-
+                    const res = await api.get('/character/summary');
+                    if (res.data.success) {
+                        const data = res.data.data;
+                        setSummary(typeof data === 'object' ? data.text : data);
                     }
                 } else {
-                    // 친구 프로필일 때는 기존 로직 유지 (친구의 상태 메시지)
                     const friendSummary = myInfo.summary || myInfo.statusMessage;
                     setSummary(typeof friendSummary === 'object' ? friendSummary.text : (friendSummary || "오늘의 기록이 없습니다."));
                 }
             } catch (error) {
-                console.error("메시지 로드 실패", error);
-                setSummary("오늘 하루도 파이팅!");
+                setSummary("오늘 하루를 기록해보세요!");
             }
         };
-        fetchDisplayMessage();
+        fetchSummary();
     }, [isMe, myInfo]);
 
     const mood = getCharacterMood(myInfo?.status || myInfo);
