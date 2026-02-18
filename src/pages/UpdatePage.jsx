@@ -83,25 +83,46 @@ export default function UpdatePage() {
   // 2. 슬라이더 값 변경 핸들러
   const handleSliderChange = async (e) => {
     const { name, value } = e.target;
-    const updated = {
-      ...statusData,
-      [name]: parseInt(value),
-    };
-    setStatusData(updated);
-    await updateApi.patchTodayStatus(updated);
+      setStatusData(prev => ({
+      ...prev,
+      [name]: parseInt(value), // 숫자로 변환
+    }));
   };
 
   const handleSync = async () => {
     try {
       setLoading(true);
-      await updateApi.postTodayStatus(statusData);// 상태 저장
-      await updateApi.calculateStatus();
 
+      const requestData = {
+        energy: statusData.energy,
+        burden: statusData.burden,
+        passion: statusData.passion
+      };
+
+      // 1. 저장 또는 수정 (기존 로직 유지)
+      try {
+        await updateApi.patchTodayStatus(requestData);
+      } catch (patchErr) {
+        if (patchErr.response?.data?.message === "기록이 없습니다.") {
+          await updateApi.postTodayStatus(requestData);
+          console.log("기록이 없어 새로 저장합니다.");
+        } else {
+          throw patchErr; // 다른 에러면 밖으로 던짐
+        }
+      }
+
+      // 2. 중요: 계산 API 호출 시 데이터를 함께 전달
+      await updateApi.calculateStatus(requestData);
+
+      // 3. 최신 점수 가져오기
       const scoreRes = await updateApi.characterScore();
       setCharacterScore(scoreRes.data.score);
-      alert('오늘의 상태를 저장하였습니다.')
+      
+      alert('오늘의 상태 수정이 완료되었습니다!');
     } catch (error) {
-      console.error(error);
+      // 구체적인 에러 위치 파악을 위해 로그 강화
+      console.error("상세 에러:", error.response?.data);
+      alert(`반영 실패: ${error.response?.data?.message || "서버 오류"}`);
     } finally {
       setLoading(false);
     }
@@ -162,19 +183,19 @@ export default function UpdatePage() {
               <div className="label-row">
                 <FaWeightHanging className="icon" />
                 <span className="name">PRESSURE</span>
-                <span className="value">{statusData.pressure}%</span>
+                <span className="value">{statusData.burden}%</span>
               </div>
               <div className="bar-bg">
                 <div
                   className="bar-fill"
-                  style={{ width: `${statusData.pressure}%` }}
+                  style={{ width: `${statusData.burden}%` }}
                 ></div>
                 <input
                   type="range"
-                  name="pressure"
+                  name="burden"
                   min="0"
                   max="100"
-                  value={statusData.pressure}
+                  value={statusData.burden}
                   onChange={handleSliderChange}
                   className="real-slider"
                 ></input>
