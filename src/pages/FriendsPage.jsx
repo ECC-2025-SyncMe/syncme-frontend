@@ -32,41 +32,39 @@ export default function Friends() {
             try {
                 const [userRes, statusRes, followingRes, followerRes, commentsRes] = await Promise.all([
                     api.get('/users/me'),
-                    api.get('/status/today'), // 상태 데이터 추가 조회
+                    api.get('/status/today'),
                     api.get('/friends/following'),
                     api.get('/friends/followers'),
                     api.get('/comments/received')
                 ]);
 
                 let userData = null;
-
-                // 내 정보 세팅
                 if (userRes.data.success) {
                     userData = userRes.data.data;
                 }
 
-                // 오늘의 상태(무드 이미지용) 병합
-                // UpdatePage에서 방금 수정한 값을 확실하게 반영하기 위함
                 if (statusRes.data.success && userData) {
                     userData.status = statusRes.data.data;
                 }
 
-                // 댓글 데이터 병합
                 if (commentsRes.data.success && userData) {
                     userData.comments = commentsRes.data.data;
                 }
 
-                // 병합된 데이터를 상태에 저장
                 if (userData) {
                     setMyProfile(userData);
                 }
 
-                // 친구 리스트 세팅
+                // 탈퇴한 유저 필터링
+                // 서버 응답 구조에 따라 f.userId 혹은 f 자체가 null인지 확인
                 if (followingRes.data.success && Array.isArray(followingRes.data.data)) {
-                    setFollowingList(followingRes.data.data);
+                    const validFollowing = followingRes.data.data.filter(f => f && f.userId);
+                    setFollowingList(validFollowing);
                 }
+
                 if (followerRes.data.success && Array.isArray(followerRes.data.data)) {
-                    setFollowerList(followerRes.data.data);
+                    const validFollowers = followerRes.data.data.filter(f => f && f.userId);
+                    setFollowerList(validFollowers);
                 }
 
             } catch (error) {
@@ -77,7 +75,7 @@ export default function Friends() {
         };
 
         fetchInitialData();
-    }, [location.key]); // location.key가 바뀔 때(페이지 이동 시) 무조건 재실행
+    }, [location.key]);
 
     // 검색 기능
     useEffect(() => {
@@ -143,9 +141,10 @@ export default function Friends() {
         }
 
         if (activeTab === 'following') {
-            return followingList.filter(f => f != null).map(user => ({ ...user, isFollowing: true }));
+            // f가 null이 아닌지 한 번 더 체크
+            return followingList.filter(f => f && f.userId).map(user => ({ ...user, isFollowing: true }));
         } else {
-            return followerList.filter(f => f != null).map(user => ({
+            return followerList.filter(f => f && f.userId).map(user => ({
                 ...user,
                 isFollowing: followingList.some(f => f?.userId === user.userId)
             }));
