@@ -186,7 +186,7 @@ export default function SettingPage() {
         {/* 하단 정보 및 링크 */}
         <section className="footer-info">
           <div className="footer-links">
-            <span>About</span>
+            <span onClick={handleGetUserInfo}>About</span>
             <span>Services</span>
           </div>
 
