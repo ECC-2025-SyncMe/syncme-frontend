@@ -193,7 +193,7 @@ export default function SettingPage() {
           <div className="social-icons">
             <FaGithub className="social-icon" onClick={() => openLink('https://github.com/')} />
             <FaFigma className="social-icon" onClick={() => openLink('https://www.figma.com/')} />
-            <SiNotion className="social-icon" onClick={() => openLink('https://www.notion.so/')} />
+            <SiNotion className="social-icon" onClick={() => openLink('https://www.notion.so/1-2e46ce44b4038033b4fafe45f0d3594d')} />
           </div>
         </section>
       </main>
