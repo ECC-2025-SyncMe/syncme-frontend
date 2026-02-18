@@ -1,29 +1,23 @@
 /* App.css의 .content-container 내부에서 꽉 차게 동작 */
 .setting-page {
   width: 100%;
-  /* 부모(.content-container)의 높이(padding 제외 영역)를 꽉 채움 */
   height: 100%;
   background-color: #000000;
   color: #fff;
 
-  /* 정중앙 정렬을 위한 Flex 설정 */
   display: flex;
-  justify-content: center;
-  /* 수직 중앙 (상하) */
-  align-items: center;
-  /* 수평 중앙 (좌우) */
-
+  padding-top: 5%;
+  padding-left: 20%;
+  padding-right: 20%;
   /* 내부 스크롤 방지 */
   overflow: hidden;
 }
 
 .setting-main {
   width: 100%;
-  max-width: 420px;
-  /* 모바일/앱 느낌을 위해 너비 제한 */
+  height: 100%;
+  
   padding: 0 2rem;
-  /* 좌우 여백만 줌 */
-
   display: flex;
   flex-direction: column;
   /* 요소들 사이의 간격을 균일하게 배치 */
@@ -35,7 +29,6 @@
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  /* 프로필 아래 간격을 조금 더 줌 */
   margin-bottom: 0.5rem;
 }
 
@@ -111,9 +104,7 @@
 }
 
 .danger {
-  /* 계정 삭제 등 위험 요소에 대한 스타일 (옵션) */
   color: #fff;
-  /* 살짝 붉은 톤 */
 }
 
 /* 구분선 */
