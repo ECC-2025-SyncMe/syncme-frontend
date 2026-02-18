@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom'; // 페이지 이동 감지용 import
 import api from '../api/axios';
 
 // 레이아웃 스타일 불러오기
@@ -10,6 +11,7 @@ import FriendList from '../components/friends/FriendList';
 import GuestWall from '../components/friends/GuestWall';
 
 export default function Friends() {
+    const location = useLocation(); // 위치 정보 훅 사용
     const [myProfile, setMyProfile] = useState(null);
 
     // 친구 목록 상태
@@ -24,15 +26,16 @@ export default function Friends() {
     const [activeTab, setActiveTab] = useState('following');
     const [loading, setLoading] = useState(true);
 
-    // 초기 데이터 로드
+    // 초기 데이터 로드(페이지 진입 시마다 실행)
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [userRes, followingRes, followerRes, commentsRes] = await Promise.all([
+                const [userRes, statusRes, followingRes, followerRes, commentsRes] = await Promise.all([
                     api.get('/users/me'),
+                    api.get('/status/today'), // 상태 데이터 추가 조회
                     api.get('/friends/following'),
                     api.get('/friends/followers'),
-                    api.get('/comments/received') // 내가 받은 댓글 조회
+                    api.get('/comments/received')
                 ]);
 
                 let userData = null;
@@ -42,7 +45,13 @@ export default function Friends() {
                     userData = userRes.data.data;
                 }
 
-                // 댓글 데이터가 있으면 내 정보에 'comments' 필드로 병합
+                // 오늘의 상태(무드 이미지용) 병합
+                // UpdatePage에서 방금 수정한 값을 확실하게 반영하기 위함
+                if (statusRes.data.success && userData) {
+                    userData.status = statusRes.data.data;
+                }
+
+                // 댓글 데이터 병합
                 if (commentsRes.data.success && userData) {
                     userData.comments = commentsRes.data.data;
                 }
@@ -52,7 +61,7 @@ export default function Friends() {
                     setMyProfile(userData);
                 }
 
-                // 팔로잉/팔로워 리스트 세팅
+                // 친구 리스트 세팅
                 if (followingRes.data.success && Array.isArray(followingRes.data.data)) {
                     setFollowingList(followingRes.data.data);
                 }
@@ -68,7 +77,7 @@ export default function Friends() {
         };
 
         fetchInitialData();
-    }, []);
+    }, [location.key]); // location.key가 바뀔 때(페이지 이동 시) 무조건 재실행
 
     // 검색 기능
     useEffect(() => {
@@ -80,7 +89,6 @@ export default function Friends() {
             try {
                 const res = await api.get(`/users/search?query=${keyword}&type=nickname`);
                 if (res.data.success && Array.isArray(res.data.data)) {
-                    // 검색 결과에서 '나'는 제외하고 저장
                     const filtered = res.data.data.filter(u => u.userId !== myProfile?.userId);
                     setSearchResults(filtered);
                 }
@@ -108,11 +116,9 @@ export default function Friends() {
             const isAlreadyFollowing = followingList.some(f => f?.userId === friendId);
 
             if (isAlreadyFollowing) {
-                // 언팔로우: UI 선반영
                 setFollowingList(prev => prev.filter(f => f?.userId !== friendId));
                 await api.delete(`/friends/${friendId}`);
             } else {
-                // 팔로우: UI 선반영
                 const targetUser = searchResults.find(u => u.userId === friendId)
                     || followerList.find(u => u.userId === friendId);
                 const newFriend = targetUser || { userId: friendId, nickname: 'Unknown' };
@@ -146,14 +152,13 @@ export default function Friends() {
         }
     };
 
-    // 타겟 설정(내 프로필 or 친구 프로필)
+    // 타겟 설정
     const wallUser = target || myProfile;
     const isMe = target === null;
 
-    // 친구 선택 핸들러(친구 정보 + 친구 댓글 가져오기)
+    // 친구 선택 핸들러
     const handleSelectFriend = async (friend) => {
         try {
-            // 친구 홈 정보 조회, 친구 댓글 조회
             const [homeRes, commentsRes] = await Promise.all([
                 api.get(`/home/${friend.userId}`),
                 api.get(`/friends/${friend.userId}/comments`)
@@ -161,12 +166,10 @@ export default function Friends() {
 
             let finalFriendData = { ...friend };
 
-            // 홈 정보 병합
             if (homeRes.data.success) {
                 finalFriendData = { ...finalFriendData, ...homeRes.data.data };
             }
 
-            // 댓글 정보 병합
             if (commentsRes.data.success) {
                 finalFriendData.comments = commentsRes.data.data;
             } else {
@@ -189,7 +192,6 @@ export default function Friends() {
         }
 
         try {
-            // 친구에게 댓글 작성 POST
             const res = await api.post(`/friends/${target.userId}/comments`, {
                 content: text
             });
@@ -210,7 +212,7 @@ export default function Friends() {
     if (loading || !myProfile) {
         return (
             <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', background: '#000' }}>
-                로딩 중입니다...
+                로딩 중...
             </div>
         );
     }
@@ -249,5 +251,4 @@ export default function Friends() {
             </Column>
         </Container>
     );
-
 }
