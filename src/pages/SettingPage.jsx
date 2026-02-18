@@ -32,6 +32,10 @@ export default function SettingPage() {
     fetchUserData(); // 사용자 데이터 로드
   }, []);
 
+  if (loading) {
+    return <div className="setting-page">Loading...</div>;
+  }
+
   // 이메일 정보
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,10 +48,6 @@ export default function SettingPage() {
     };
     fetchUser();
   }, []);
-
-  if (loading) {
-    return <div className="setting-page">Loading...</div>;
-  }
 
   // 1. 프로필 편집
   const handleChangeName = async () => {

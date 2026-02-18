@@ -28,7 +28,6 @@ export default function LoginPage() {
     }
   };
 
-
   const handleGoogleError = () => {
     console.error('Google 로그인 에러');
     alert('Google 로그인에 실패했습니다.');
