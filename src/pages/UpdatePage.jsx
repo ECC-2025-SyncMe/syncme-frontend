@@ -76,7 +76,6 @@ export default function UpdatePage() {
 
   if (loading) return <div>Loading...</div>;
 
-  // 캐릭터 이미지 매핑
   const moodImg = { stress, burning, happy, neutral };
   <img src={moodImg[getCharacterMood(statusData)]} />
 
@@ -106,9 +105,7 @@ export default function UpdatePage() {
         if (patchErr.response?.data?.message === "기록이 없습니다.") {
           await updateApi.postTodayStatus(requestData);
           console.log("기록이 없어 새로 저장합니다.");
-        } else {
-          throw patchErr; // 다른 에러면 밖으로 던짐
-        }
+        } else { throw patchErr; }
       }
 
       // 2. 중요: 계산 API 호출 시 데이터를 함께 전달
@@ -116,7 +113,7 @@ export default function UpdatePage() {
 
       // 3. 최신 점수 가져오기
       const scoreRes = await updateApi.characterScore();
-      setCharacterScore(scoreRes.data.score);
+      setCharacter(prev => ({ ...prev, score: scoreRes.data.score }));
       
       alert('오늘의 상태 수정이 완료되었습니다!');
     } catch (error) {
