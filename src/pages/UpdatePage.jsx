@@ -91,7 +91,6 @@ export default function UpdatePage() {
   const handleSync = async () => {
     try {
       setLoading(true);
-
       const requestData = {
         energy: statusData.energy,
         burden: statusData.burden,
@@ -108,10 +107,8 @@ export default function UpdatePage() {
         } else { throw patchErr; }
       }
 
-      // 2. 중요: 계산 API 호출 시 데이터를 함께 전달
       await updateApi.calculateStatus(requestData);
 
-      // 3. 최신 점수 가져오기
       const scoreRes = await updateApi.characterScore();
       setCharacter(prev => ({ ...prev, score: scoreRes.data.score }));
       
