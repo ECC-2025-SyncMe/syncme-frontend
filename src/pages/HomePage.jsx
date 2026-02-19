@@ -116,12 +116,17 @@ export default function Home() {
                     if (historyRes.status === 'fulfilled' && historyRes.value.data.success) {
                         const items = historyRes.value.data.data.items || [];
                         setAllHistory(items);
-                        setHistoryData(items.slice(-7).map(item => ({
+
+                        const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+                        const recentItems = sortedItems.slice(0, 7).reverse();
+
+                        setHistoryData(recentItems.map(item => ({
                             date: item.date,
                             shortDate: item.date.substring(5),
                             score: calculateTotalScore(item)
                         })));
                     }
+                    // -------------------------------------
 
                     if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
                         pickRandomComment(commentsRes.value.data.data);
@@ -132,9 +137,8 @@ export default function Home() {
                     const userRes = await api.get(`/home/${userId}`);
 
                     if (userRes.data.success) {
-                        setMyInfo(userRes.data.data); // 유저 정보 세팅
+                        setMyInfo(userRes.data.data);
 
-                        // 유저 ID를 파라미터로 넘겨 해당 유저의 점수와 히스토리를 가져옴
                         const [statusRes, historyRes, commentsRes] = await Promise.allSettled([
                             api.get(`/status/today?userId=${userId}`),
                             api.get(`/status/history?userId=${userId}`),
@@ -150,12 +154,18 @@ export default function Home() {
                         if (historyRes.status === 'fulfilled' && historyRes.value.data.success) {
                             const items = historyRes.value.data.data.items || [];
                             setAllHistory(items);
-                            setHistoryData(items.slice(-7).map(item => ({
+
+                            // 동일한 정렬 로직 적용
+                            const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+                            const recentItems = sortedItems.slice(0, 7).reverse();
+
+                            setHistoryData(recentItems.map(item => ({
                                 date: item.date,
                                 shortDate: item.date.substring(5),
                                 score: calculateTotalScore(item)
                             })));
                         }
+                        // -------------------------------------
 
                         if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
                             pickRandomComment(commentsRes.value.data.data);
