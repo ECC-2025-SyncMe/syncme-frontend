@@ -13,7 +13,7 @@ import RightChartPanel from '../components/home/RightChartPanel';
 export default function Home() {
     const { userId } = useParams();
     const location = useLocation();
-    const isMe = !userId;
+    const isMe = !userId; // userId 파라미터가 없으면 내 홈
 
     const [myInfo, setMyInfo] = useState(null);
     const [displayData, setDisplayData] = useState({
@@ -46,12 +46,13 @@ export default function Home() {
         });
     };
 
+    // 캘린더 날짜 클릭 시 대시보드 업데이트
     const updateDashboard = async (targetDate) => {
-        if (!isMe) return;
         const targetStr = toDateStr(targetDate);
         const todayStr = toDateStr(new Date());
 
-        if (targetStr === todayStr) {
+        // 내 홈이고, 오늘 날짜를 클릭했을 때만 API 재호출(상태 변경 가능성)
+        if (isMe && targetStr === todayStr) {
             try {
                 const res = await api.get('/status/today');
                 if (res.data.success && res.data.data) {
@@ -72,6 +73,7 @@ export default function Home() {
             }
         }
 
+        // 그 외(남의 홈이거나 과거 날짜)는 이미 받아온 allHistory에서 찾아서 표시
         const foundData = allHistory.find(item => item.date === targetStr);
         if (foundData) {
             const stats = {
@@ -84,6 +86,7 @@ export default function Home() {
                 stats: stats
             });
         } else {
+            // 데이터 없음
             setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
         }
     };
@@ -95,7 +98,6 @@ export default function Home() {
             setLoading(true);
             try {
                 if (isMe) {
-                    // 내 홈 접속
                     const [userRes, statusRes, historyRes, commentsRes] = await Promise.allSettled([
                         api.get('/users/me'),
                         api.get('/status/today'),
@@ -116,46 +118,56 @@ export default function Home() {
                     if (historyRes.status === 'fulfilled' && historyRes.value.data.success) {
                         const items = historyRes.value.data.data.items || [];
                         setAllHistory(items);
-
+                        // 차트용 데이터 가공
                         const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
                         const recentItems = sortedItems.slice(0, 7).reverse();
-
                         setHistoryData(recentItems.map(item => ({
                             date: item.date,
                             shortDate: item.date.substring(5),
                             score: calculateTotalScore(item)
                         })));
                     }
-                    // -------------------------------------
 
                     if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
                         pickRandomComment(commentsRes.value.data.data);
                     }
 
                 } else {
-                    // 공유 링크 접속 (userId 기반 데이터 강제 조회)
-                    const userRes = await api.get(`/home/${userId}`);
+                    const response = await api.get(`/home/${userId}`);
 
-                    if (userRes.data.success) {
-                        setMyInfo(userRes.data.data);
+                    if (response.data.success) {
+                        const data = response.data.data;
 
-                        const [statusRes, historyRes, commentsRes] = await Promise.allSettled([
-                            api.get(`/status/today?userId=${userId}`),
-                            api.get(`/status/history?userId=${userId}`),
-                            api.get(`/friends/${userId}/comments`)
-                        ]);
+                        // 유저 정보 세팅
+                        setMyInfo({
+                            userId: data.userId,
+                            nickname: data.nickname,
+                            isFollowing: data.isFollowing
+                        });
 
-                        if (statusRes.status === 'fulfilled' && statusRes.value.data.success && statusRes.value.data.data) {
-                            const s = statusRes.value.data.data;
-                            const stats = { energy: s.energy || 0, burden: s.burden || s.pressure || 0, passion: s.passion || 0 };
-                            setDisplayData({ score: s.totalScore || calculateTotalScore(stats), stats });
+                        // 오늘 상태(Today Status) 세팅
+                        if (data.todayStatus && data.todayStatus.exists) {
+                            const ts = data.todayStatus;
+                            const stats = {
+                                energy: ts.energy,
+                                burden: ts.burden,
+                                passion: ts.passion
+                            };
+                            setDisplayData({
+                                score: calculateTotalScore(stats),
+                                stats: stats
+                            });
+                        } else {
+                            // 오늘 기록 없음
+                            setDisplayData({ score: 0, stats: { energy: 0, burden: 0, passion: 0 } });
                         }
 
-                        if (historyRes.status === 'fulfilled' && historyRes.value.data.success) {
-                            const items = historyRes.value.data.data.items || [];
+                        // 히스토리(History) 세팅
+                        if (data.statusHistory && data.statusHistory.items) {
+                            const items = data.statusHistory.items;
                             setAllHistory(items);
 
-                            // 동일한 정렬 로직 적용
+                            // 차트용: 최신 날짜순 정렬 -> 7개 자르기 -> 뒤집기(과거->현재)
                             const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
                             const recentItems = sortedItems.slice(0, 7).reverse();
 
@@ -164,11 +176,14 @@ export default function Home() {
                                 shortDate: item.date.substring(5),
                                 score: calculateTotalScore(item)
                             })));
+                        } else {
+                            setAllHistory([]);
+                            setHistoryData([]);
                         }
-                        // -------------------------------------
 
-                        if (commentsRes.status === 'fulfilled' && commentsRes.value.data.success) {
-                            pickRandomComment(commentsRes.value.data.data);
+                        // 코멘트(Comments) 세팅
+                        if (data.receivedComments) {
+                            pickRandomComment(data.receivedComments);
                         }
                     }
                 }
@@ -183,6 +198,7 @@ export default function Home() {
     }, [userId, isMe, location.key]);
 
     if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: '50px' }}>로딩 중...</div>;
+    // myInfo가 없으면 로딩 실패로 간주
     if (!myInfo) return <div style={{ color: '#fff', textAlign: 'center', padding: '50px' }}>정보를 불러올 수 없습니다.</div>;
 
     return (
@@ -191,7 +207,7 @@ export default function Home() {
                 myInfo={myInfo}
                 randomComment={randomComment}
                 {...calendar}
-                isReadOnly={!isMe}
+                isReadOnly={!isMe} // 남의 홈이면 읽기 전용
                 recordedDates={allHistory.map(d => d.date)}
             />
             <DashboardGrid>

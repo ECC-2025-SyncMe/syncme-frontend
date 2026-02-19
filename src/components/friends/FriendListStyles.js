@@ -5,7 +5,7 @@ export const SearchBar = styled.div`
   display: flex; align-items: center; 
   background: #252525; padding: 12px; border-radius: 12px; 
   margin-bottom: 20px; border: 1px solid ${theme.colors.border}; 
-  /* 검색창 크기 고정 (줄어들지 않음) */
+  /* 검색창 크기 고정(줄어들지 않음) */
   flex-shrink: 0;
   input { border: none; background: transparent; outline: none; color: white; width: 100%; }
 `;
@@ -27,7 +27,7 @@ export const TabButton = styled.button`
 export const List = styled.div` 
   flex: 1; 
   width: 100%; 
-  overflow-y: auto; /* 오직 여기서만 스크롤! */
+  overflow-y: auto;
   min-height: 0; 
   scrollbar-gutter: stable; /* 스크롤바 공간 예약 */
 
